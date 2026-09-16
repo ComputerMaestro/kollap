@@ -3,17 +3,18 @@
 // kollap HTTP client CLI support package
 //
 // Command:
-// $ goa gen Collap/design
+// $ goa gen github.com/ComputerMaestro/kollap/design/v1
 
 package cli
 
 import (
-	kollapc "Collap/gen/http/kollap/client"
 	"flag"
 	"fmt"
 	"net/http"
 	"os"
 
+	documentsc "github.com/ComputerMaestro/kollap/gen/http/documents/client"
+	workspacesc "github.com/ComputerMaestro/kollap/gen/http/workspaces/client"
 	goahttp "goa.design/goa/v3/http"
 	goa "goa.design/goa/v3/pkg"
 )
@@ -23,13 +24,15 @@ import (
 //	command (subcommand1|subcommand2|...)
 func UsageCommands() []string {
 	return []string{
-		"kollap create-workspace",
+		"workspaces create-workspace",
+		"documents get-document",
 	}
 }
 
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
-	return os.Args[0] + " " + "kollap create-workspace --p \"Et iusto autem perferendis eveniet.\"" + "\n" +
+	return os.Args[0] + " " + "workspaces create-workspace --body '{\n      \"name\": \"Voluptatem corporis nemo qui dicta occaecati.\"\n   }'" + "\n" +
+		os.Args[0] + " " + "documents get-document --id \"8c7dabda-b24d-4484-9199-df8f98d6d854\"" + "\n" +
 		""
 }
 
@@ -43,13 +46,21 @@ func ParseEndpoint(
 	restore bool,
 ) (goa.Endpoint, any, error) {
 	var (
-		kollapFlags = flag.NewFlagSet("kollap", flag.ContinueOnError)
+		workspacesFlags = flag.NewFlagSet("workspaces", flag.ContinueOnError)
 
-		kollapCreateWorkspaceFlags = flag.NewFlagSet("create-workspace", flag.ExitOnError)
-		kollapCreateWorkspacePFlag = kollapCreateWorkspaceFlags.String("p", "REQUIRED", "test1")
+		workspacesCreateWorkspaceFlags    = flag.NewFlagSet("create-workspace", flag.ExitOnError)
+		workspacesCreateWorkspaceBodyFlag = workspacesCreateWorkspaceFlags.String("body", "REQUIRED", "")
+
+		documentsFlags = flag.NewFlagSet("documents", flag.ContinueOnError)
+
+		documentsGetDocumentFlags  = flag.NewFlagSet("get-document", flag.ExitOnError)
+		documentsGetDocumentIDFlag = documentsGetDocumentFlags.String("id", "REQUIRED", "")
 	)
-	kollapFlags.Usage = kollapUsage
-	kollapCreateWorkspaceFlags.Usage = kollapCreateWorkspaceUsage
+	workspacesFlags.Usage = workspacesUsage
+	workspacesCreateWorkspaceFlags.Usage = workspacesCreateWorkspaceUsage
+
+	documentsFlags.Usage = documentsUsage
+	documentsGetDocumentFlags.Usage = documentsGetDocumentUsage
 
 	if err := flag.CommandLine.Parse(os.Args[1:]); err != nil {
 		return nil, nil, err
@@ -66,8 +77,10 @@ func ParseEndpoint(
 	{
 		svcn = flag.Arg(0)
 		switch svcn {
-		case "kollap":
-			svcf = kollapFlags
+		case "workspaces":
+			svcf = workspacesFlags
+		case "documents":
+			svcf = documentsFlags
 		default:
 			return nil, nil, fmt.Errorf("unknown service %q", svcn)
 		}
@@ -83,10 +96,17 @@ func ParseEndpoint(
 	{
 		epn = svcf.Arg(0)
 		switch svcn {
-		case "kollap":
+		case "workspaces":
 			switch epn {
 			case "create-workspace":
-				epf = kollapCreateWorkspaceFlags
+				epf = workspacesCreateWorkspaceFlags
+
+			}
+
+		case "documents":
+			switch epn {
+			case "get-document":
+				epf = documentsGetDocumentFlags
 
 			}
 
@@ -110,12 +130,19 @@ func ParseEndpoint(
 	)
 	{
 		switch svcn {
-		case "kollap":
-			c := kollapc.NewClient(scheme, host, doer, enc, dec, restore)
+		case "workspaces":
+			c := workspacesc.NewClient(scheme, host, doer, enc, dec, restore)
 			switch epn {
 			case "create-workspace":
 				endpoint = c.CreateWorkspace()
-				data = *kollapCreateWorkspacePFlag
+				data, err = workspacesc.BuildCreateWorkspacePayload(*workspacesCreateWorkspaceBodyFlag)
+			}
+		case "documents":
+			c := documentsc.NewClient(scheme, host, doer, enc, dec, restore)
+			switch epn {
+			case "get-document":
+				endpoint = c.GetDocument()
+				data, err = documentsc.BuildGetDocumentPayload(*documentsGetDocumentIDFlag)
 			}
 		}
 	}
@@ -126,20 +153,21 @@ func ParseEndpoint(
 	return endpoint, data, nil
 }
 
-// kollapUsage displays the usage of the kollap command and its subcommands.
-func kollapUsage() {
-	fmt.Fprintln(os.Stderr, `A backend service powering a Collaborative Knowledge Platform`)
-	fmt.Fprintf(os.Stderr, "Usage:\n    %s [globalflags] kollap COMMAND [flags]\n\n", os.Args[0])
+// workspacesUsage displays the usage of the workspaces command and its
+// subcommands.
+func workspacesUsage() {
+	fmt.Fprintln(os.Stderr, `Workspaces related requests`)
+	fmt.Fprintf(os.Stderr, "Usage:\n    %s [globalflags] workspaces COMMAND [flags]\n\n", os.Args[0])
 	fmt.Fprintln(os.Stderr, "COMMAND:")
 	fmt.Fprintln(os.Stderr, `    create-workspace: CreateWorkspace implements createWorkspace.`)
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Additional help:")
-	fmt.Fprintf(os.Stderr, "    %s kollap COMMAND --help\n", os.Args[0])
+	fmt.Fprintf(os.Stderr, "    %s workspaces COMMAND --help\n", os.Args[0])
 }
-func kollapCreateWorkspaceUsage() {
+func workspacesCreateWorkspaceUsage() {
 	// Header with flags
-	fmt.Fprintf(os.Stderr, "%s [flags] kollap create-workspace", os.Args[0])
-	fmt.Fprint(os.Stderr, " -p STRING")
+	fmt.Fprintf(os.Stderr, "%s [flags] workspaces create-workspace", os.Args[0])
+	fmt.Fprint(os.Stderr, " -body JSON")
 	fmt.Fprintln(os.Stderr)
 
 	// Description
@@ -147,9 +175,38 @@ func kollapCreateWorkspaceUsage() {
 	fmt.Fprintln(os.Stderr, `CreateWorkspace implements createWorkspace.`)
 
 	// Flags list
-	fmt.Fprintln(os.Stderr, `    -p STRING: test1`)
+	fmt.Fprintln(os.Stderr, `    -body JSON: `)
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "kollap create-workspace --p \"Et iusto autem perferendis eveniet.\"")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "workspaces create-workspace --body '{\n      \"name\": \"Voluptatem corporis nemo qui dicta occaecati.\"\n   }'")
+}
+
+// documentsUsage displays the usage of the documents command and its
+// subcommands.
+func documentsUsage() {
+	fmt.Fprintln(os.Stderr, `Documents related Endpoints`)
+	fmt.Fprintf(os.Stderr, "Usage:\n    %s [globalflags] documents COMMAND [flags]\n\n", os.Args[0])
+	fmt.Fprintln(os.Stderr, "COMMAND:")
+	fmt.Fprintln(os.Stderr, `    get-document: GetDocument implements getDocument.`)
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, "Additional help:")
+	fmt.Fprintf(os.Stderr, "    %s documents COMMAND --help\n", os.Args[0])
+}
+func documentsGetDocumentUsage() {
+	// Header with flags
+	fmt.Fprintf(os.Stderr, "%s [flags] documents get-document", os.Args[0])
+	fmt.Fprint(os.Stderr, " -id STRING")
+	fmt.Fprintln(os.Stderr)
+
+	// Description
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, `GetDocument implements getDocument.`)
+
+	// Flags list
+	fmt.Fprintln(os.Stderr, `    -id STRING: `)
+
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, "Example:")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "documents get-document --id \"8c7dabda-b24d-4484-9199-df8f98d6d854\"")
 }

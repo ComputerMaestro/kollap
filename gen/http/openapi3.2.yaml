@@ -1,39 +1,142 @@
 openapi: 3.2.0
 info:
-    title: Goa API
-    version: 0.0.1
+    title: Collaborative Knowledge Platform Backenk service
+    description: |4-
+        	API for backend service powering Kollap platform.
+        	
+    version: "1.0"
 servers:
     - url: http://localhost:80
       name: kollap
       description: Default server for kollap
 paths:
-    /workspace/{name}:
+    /v1/document/{id}:
         get:
             tags:
-                - kollap
-            summary: createWorkspace kollap
-            operationId: kollap#createWorkspace
+                - documents
+            summary: getDocument documents
+            operationId: documents#getDocument
             parameters:
-                - name: name
+                - name: id
                   in: path
-                  description: test1
                   required: true
                   schema:
                     type: string
-                    description: test1
-                    example: Est non necessitatibus quaerat voluptas doloremque rerum.
-                  example: Quo nulla ut rerum.
+                    example: 8c7dabda-b24d-4484-9199-df8f98d6d854
+                    format: uuid
+                  example: 9b1b6de0-efc8-475c-92f8-15c3537edf65
             responses:
                 "200":
                     description: OK response.
                     content:
                         application/json:
                             schema:
-                                type: string
-                                description: Created
-                                example: Facere exercitationem sunt ut quod placeat.
-                            example: Facere exercitationem sunt ut quod placeat.
-components: {}
+                                $ref: '#/components/schemas/Document'
+                            example:
+                                content: Tempora voluptatem qui eius ipsam.
+                                created_at: "1970-05-13T09:37:10Z"
+                                id: d00088da-f935-4c13-a4ae-1d37c5d95e09
+                                title: Qui nobis sunt.
+                                version: 776250283615509095
+    /v1/workspace/create:
+        post:
+            tags:
+                - workspaces
+            summary: createWorkspace workspaces
+            operationId: workspaces#createWorkspace
+            requestBody:
+                description: Request body for createWorkspace.
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/CreateWorkspaceRequestBody'
+                        example:
+                            name: Voluptatem corporis nemo qui dicta occaecati.
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Workspace'
+                            example:
+                                created_at: "1997-02-12T09:49:59Z"
+                                id: 72ea645c-b5d8-414b-a9ef-50a95d381edf
+                                name: Eum quo incidunt.
+                                owner_id: 11e6c044-e250-4055-81fd-ba9bfda9b8df
+components:
+    schemas:
+        CreateWorkspaceRequestBody:
+            type: object
+            properties:
+                name:
+                    type: string
+                    example: Voluptatem corporis nemo qui dicta occaecati.
+            description: Request body for createWorkspace.
+            example:
+                name: Voluptatem corporis nemo qui dicta occaecati.
+            required:
+                - name
+        Document:
+            type: object
+            properties:
+                content:
+                    type: string
+                    example: Tempora voluptatem qui eius ipsam.
+                created_at:
+                    type: string
+                    example: "1970-05-13T09:37:10Z"
+                    format: date-time
+                id:
+                    type: string
+                    example: d00088da-f935-4c13-a4ae-1d37c5d95e09
+                    format: uuid
+                title:
+                    type: string
+                    example: Qui nobis sunt.
+                version:
+                    type: integer
+                    example: 776250283615509095
+                    format: int64
+            description: Knowledge sharing medium in this platform is a document.
+            example:
+                content: Tempora voluptatem qui eius ipsam.
+                created_at: "1970-05-13T09:37:10Z"
+                id: d00088da-f935-4c13-a4ae-1d37c5d95e09
+                title: Qui nobis sunt.
+                version: 776250283615509095
+        Workspace:
+            type: object
+            properties:
+                created_at:
+                    type: string
+                    example: "1997-02-12T09:49:59Z"
+                    format: date-time
+                id:
+                    type: string
+                    example: 72ea645c-b5d8-414b-a9ef-50a95d381edf
+                    format: uuid
+                name:
+                    type: string
+                    example: Eum quo incidunt.
+                owner_id:
+                    type: string
+                    example: 11e6c044-e250-4055-81fd-ba9bfda9b8df
+                    format: uuid
+            description: Workspace is where multiple people can come and share knowledge using documents.
+            example:
+                created_at: "1997-02-12T09:49:59Z"
+                id: 72ea645c-b5d8-414b-a9ef-50a95d381edf
+                name: Eum quo incidunt.
+                owner_id: 11e6c044-e250-4055-81fd-ba9bfda9b8df
+            required:
+                - id
+                - name
+                - owner_id
+                - created_at
 tags:
-    - name: kollap
-      description: A backend service powering a Collaborative Knowledge Platform
+    - name: workspaces
+      description: Workspaces related requests
+    - name: documents
+      description: Documents related Endpoints

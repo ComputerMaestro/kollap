@@ -3,7 +3,6 @@ module github.com/ComputerMaestro/kollap
 go 1.26.0
 
 require (
-	github.com/go-chi/chi/v5 v5.3.2
 	github.com/spf13/viper v1.21.0
 	goa.design/clue v1.3.0
 	goa.design/goa/v3 v3.30.0
@@ -16,6 +15,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/dimfeld/httppath v0.0.0-20170720192232-ee938bf73598 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
+	github.com/go-chi/chi/v5 v5.3.2 // indirect
 	github.com/go-logr/logr v1.4.4 // indirect
 	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
 	github.com/gohugoio/hashstructure v1.0.0 // indirect
