@@ -5,6 +5,8 @@ import (
 
 	"github.com/ComputerMaestro/kollap/internal/domain"
 	"github.com/ComputerMaestro/kollap/internal/repository"
+	"github.com/google/uuid"
+	"goa.design/clue/log"
 )
 
 type CreateWorkspaceUC struct {
@@ -17,10 +19,16 @@ func NewCreateWorkspaceUC(repo repository.WorkspaceRepository) *CreateWorkspaceU
 	}
 }
 
-func (uc *CreateWorkspaceUC) Execute(ctx context.Context, name string) (*domain.Workspace, error) {
-
+func (uc *CreateWorkspaceUC) Execute(ctx context.Context, name string, ownerId string) (*domain.Workspace, error) {
+	parsedUUID, err := uuid.Parse(ownerId)
+	if err != nil {
+		log.Errorf(ctx, err, "failed to parse UUID")
+		return nil, err
+	}
 	workspace := &domain.Workspace{
-		Name: name,
+		ID:      uuid.New(),
+		Name:    name,
+		OwnerID: parsedUUID,
 	}
 
 	return uc.repo.Create(ctx, workspace)

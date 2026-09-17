@@ -52,8 +52,11 @@ var _ = Service("workspaces", func() {
 	Method("createWorkspace", func() {
 		Payload(func() {
 			Attribute("name", String)
+			Attribute("owner_id", func() {
+				Format(FormatUUID)
+			})
 
-			Required("name")
+			Required("name", "owner_id")
 		})
 		Result(Workspace)
 

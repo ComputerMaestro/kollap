@@ -24,11 +24,15 @@ func NewWorkspaces(createWorkspaceUC *workspace.CreateWorkspaceUC) workspaces.Se
 
 // GetWorkspace implements getWorkspace.
 func (s *workspacessrvc) CreateWorkspace(ctx context.Context, p *workspaces.CreateWorkspacePayload) (res *workspaces.Workspace, err error) {
-	w, err := s.createWorkspaceUC.Execute(ctx, p.Name)
+	w, err := s.createWorkspaceUC.Execute(ctx, p.Name, p.OwnerID)
+	if err != nil {
+		log.Errorf(ctx, err, "failed to execute create workspace use case")
+		return nil, err
+	}
 	res = &workspaces.Workspace{
-		ID:        w.ID,
+		ID:        w.ID.String(),
 		Name:      w.Name,
-		OwnerID:   w.OwnerID,
+		OwnerID:   w.OwnerID.String(),
 		CreatedAt: w.CreatedAt.Format(time.RFC3339),
 	}
 	log.Printf(ctx, "workspaces.getWorkspace")

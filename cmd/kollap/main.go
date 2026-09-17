@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"flag"
 	"fmt"
 	"net"
 	"net/url"
@@ -24,16 +23,8 @@ import (
 )
 
 func main() {
-	// Define command line flags, add any other flag required to configure the
-	// service.
-	var (
-		hostF     = flag.String("host", "localhost", "Server host (valid values: localhost)")
-		domainF   = flag.String("domain", "", "Host domain name (overrides host domain specified in service design)")
-		httpPortF = flag.String("http-port", "", "HTTP port (overrides host HTTP port specified in service design)")
-		secureF   = flag.Bool("secure", false, "Use secure scheme (https or grpcs)")
-		dbgF      = flag.Bool("debug", false, "Log request and response bodies")
-	)
-	flag.Parse()
+	// Load Configuration
+	conf := config.GetConfig()
 
 	// Setup logger. Replace logger with your own log package of choice.
 	format := log.FormatJSON
@@ -41,14 +32,11 @@ func main() {
 		format = log.FormatTerminal
 	}
 	ctx := log.Context(context.Background(), log.WithFormat(format))
-	if *dbgF {
+	if conf.Server.Debug {
 		ctx = log.Context(ctx, log.WithDebug())
 		log.Debugf(ctx, "debug logs enabled")
 	}
-	log.Print(ctx, log.KV{K: "http-port", V: *httpPortF})
-
-	// Load Configuration
-	conf := config.GetConfig()
+	log.Print(ctx, log.KV{K: "http-port", V: conf.Server.Port})
 
 	// DB initialization
 	dsn := "host=" + conf.Db.Host +
@@ -109,34 +97,28 @@ func main() {
 	ctx, cancel := context.WithCancel(ctx)
 
 	// Start the servers and send errors (if any) to the error channel.
-	switch *hostF {
+	switch conf.Server.Host {
 	case "localhost":
 		{
-			addr := "http://localhost:80"
+			addr := fmt.Sprintf("http://%s:%s", conf.Server.Host, conf.Server.Port)
 			u, err := url.Parse(addr)
 			if err != nil {
 				log.Fatalf(ctx, err, "invalid URL %#v\n", addr)
 			}
-			if *secureF {
-				u.Scheme = "https"
-			}
-			if *domainF != "" {
-				u.Host = *domainF
-			}
-			if *httpPortF != "" {
+			if conf.Server.Port != "" {
 				h, _, err := net.SplitHostPort(u.Host)
 				if err != nil {
 					log.Fatalf(ctx, err, "invalid URL %#v\n", u.Host)
 				}
-				u.Host = net.JoinHostPort(h, *httpPortF)
+				u.Host = net.JoinHostPort(h, conf.Server.Port)
 			} else if u.Port() == "" {
 				u.Host = net.JoinHostPort(u.Host, "80")
 			}
-			handleHTTPServer(ctx, u, workspacesEndpoints, documentsEndpoints, &wg, errc, *dbgF)
+			handleHTTPServer(ctx, u, workspacesEndpoints, documentsEndpoints, &wg, errc, conf.Server.Debug)
 		}
 
 	default:
-		log.Fatal(ctx, fmt.Errorf("invalid host argument: %q (valid hosts: localhost)", *hostF))
+		log.Fatal(ctx, fmt.Errorf("invalid host argument: %q (valid hosts: localhost)", conf.Server.Host))
 	}
 
 	// Wait for signal.

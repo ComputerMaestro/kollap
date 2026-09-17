@@ -48,6 +48,7 @@ paths:
                     $ref: '#/definitions/WorkspacesCreateWorkspaceRequestBody'
                     required:
                         - name
+                        - owner_id
             responses:
                 "200":
                     description: OK response.
@@ -127,7 +128,13 @@ definitions:
             name:
                 type: string
                 example: Voluptatem corporis nemo qui dicta occaecati.
+            owner_id:
+                type: string
+                example: 27bd44a5-6cf6-4e18-8b6b-ae8e809b4337
+                format: uuid
         example:
             name: Voluptatem corporis nemo qui dicta occaecati.
+            owner_id: 27bd44a5-6cf6-4e18-8b6b-ae8e809b4337
         required:
             - name
+            - owner_id

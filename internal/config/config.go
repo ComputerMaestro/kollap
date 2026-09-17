@@ -14,7 +14,9 @@ type (
 	}
 
 	Server struct {
-		Port int
+		Host  string
+		Port  string
+		Debug bool
 	}
 
 	Db struct {

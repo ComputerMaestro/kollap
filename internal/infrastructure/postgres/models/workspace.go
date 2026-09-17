@@ -3,12 +3,14 @@ package models
 import (
 	"database/sql"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type WorkspaceModel struct {
-	ID        string `gorm:"type:uuid;default:uuid_generate_v4()"`
+	ID        uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
 	Name      string
-	OwnerID   string
+	OwnerID   uuid.UUID `gorm:"type:uuid"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt sql.NullTime

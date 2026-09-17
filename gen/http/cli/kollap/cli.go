@@ -31,7 +31,7 @@ func UsageCommands() []string {
 
 // UsageExamples produces an example of a valid invocation of the CLI tool.
 func UsageExamples() string {
-	return os.Args[0] + " " + "workspaces create-workspace --body '{\n      \"name\": \"Voluptatem corporis nemo qui dicta occaecati.\"\n   }'" + "\n" +
+	return os.Args[0] + " " + "workspaces create-workspace --body '{\n      \"name\": \"Voluptatem corporis nemo qui dicta occaecati.\",\n      \"owner_id\": \"27bd44a5-6cf6-4e18-8b6b-ae8e809b4337\"\n   }'" + "\n" +
 		os.Args[0] + " " + "documents get-document --id \"8c7dabda-b24d-4484-9199-df8f98d6d854\"" + "\n" +
 		""
 }
@@ -179,7 +179,7 @@ func workspacesCreateWorkspaceUsage() {
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "workspaces create-workspace --body '{\n      \"name\": \"Voluptatem corporis nemo qui dicta occaecati.\"\n   }'")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "workspaces create-workspace --body '{\n      \"name\": \"Voluptatem corporis nemo qui dicta occaecati.\",\n      \"owner_id\": \"27bd44a5-6cf6-4e18-8b6b-ae8e809b4337\"\n   }'")
 }
 
 // documentsUsage displays the usage of the documents command and its

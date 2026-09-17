@@ -1,10 +1,14 @@
 package domain
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type Workspace struct {
-	ID        string
+	ID        uuid.UUID
 	Name      string
-	OwnerID   string
+	OwnerID   uuid.UUID
 	CreatedAt time.Time
 }
