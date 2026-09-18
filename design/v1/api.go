@@ -46,7 +46,7 @@ var Document = Type("Document", func() {
 var _ = Service("workspaces", func() {
 	Description("Workspaces related requests")
 	HTTP(func() {
-		Path("/v1/workspace")
+		Path("/v1")
 	})
 
 	Method("createWorkspace", func() {
@@ -61,7 +61,37 @@ var _ = Service("workspaces", func() {
 		Result(Workspace)
 
 		HTTP(func() {
-			POST("/create")
+			POST("/workspaces")
+		})
+	})
+
+	Method("getWorkspace", func() {
+		Payload(func() {
+			Attribute("id", func() {
+				Format(FormatUUID)
+			})
+
+			Required("id")
+		})
+		Result(Workspace)
+
+		HTTP(func() {
+			POST("/workspaces/{id}")
+		})
+	})
+
+	Method("getAllWorkspaceDocuments", func() {
+		Payload(func() {
+			Attribute("id", func() {
+				Format(FormatUUID)
+			})
+
+			Required("id")
+		})
+		Result(Workspace)
+
+		HTTP(func() {
+			POST("/workspaces/{id}/documents")
 		})
 	})
 })
@@ -69,7 +99,7 @@ var _ = Service("workspaces", func() {
 var _ = Service("documents", func() {
 	Description("Documents related Endpoints")
 	HTTP(func() {
-		Path("/v1/document")
+		Path("/v1")
 	})
 
 	Method("getDocument", func() {
@@ -77,11 +107,29 @@ var _ = Service("documents", func() {
 			Attribute("id", func() {
 				Format(FormatUUID)
 			})
+
+			Required("id")
 		})
 		Result(Document)
 
 		HTTP(func() {
-			GET("/{id}")
+			GET("/documents/{id}")
+		})
+	})
+
+	Method("createDocument", func() {
+		Payload(func() {
+			Attribute("title", String)
+			Attribute("workspace_id", func() {
+				Format(FormatUUID)
+			})
+
+			Required("title", "workspace_id")
+		})
+		Result(Document)
+
+		HTTP(func() {
+			POST("/documents")
 		})
 	})
 })
