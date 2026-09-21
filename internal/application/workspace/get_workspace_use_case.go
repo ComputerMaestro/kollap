@@ -1,26 +1,29 @@
 package workspace
 
-// func GetWorkspace(w http.ResponseWriter, r *http.Request) {
-// 	ctx := r.Context()
+import (
+	"context"
 
-// 	var p GetWorkspaceRequest
-// 	decoder := json.NewDecoder(r.Body)
-// 	err := decoder.Decode(&p)
-// 	if err != nil {
-// 		log.Printf("invalid payload - %s", err)
-// 	}
+	"github.com/ComputerMaestro/kollap/internal/domain"
+	"github.com/ComputerMaestro/kollap/internal/repository"
+	"github.com/google/uuid"
+	"goa.design/clue/log"
+)
 
-// 	workspace, err := WorkspaceDao.FindByID(ctx, p.ID)
-// 	if err != nil {
-// 		log.Print(fmt.Errorf("error finding workspace %v", err))
-// 	}
+type GetWorkspaceUC struct {
+	repo repository.WorkspaceRepository
+}
 
-// 	w.WriteHeader(http.StatusFound)
-// 	bytes, _ := json.Marshal(&Workspace{
-// 		ID:        workspace.ID,
-// 		Name:      workspace.Name,
-// 		CreatedAt: workspace.CreatedAt,
-// 		UpdatedAt: workspace.UpdatedAt,
-// 	})
-// 	w.Write(bytes)
-// }
+func NewGetWorkspaceUC(repo repository.WorkspaceRepository) *GetWorkspaceUC {
+	return &GetWorkspaceUC{
+		repo: repo,
+	}
+}
+
+func (uc *GetWorkspaceUC) Execute(ctx context.Context, id string) (*domain.Workspace, error) {
+	parseUUID, err := uuid.Parse(id)
+	if err != nil {
+		log.Errorf(ctx, err, "failed to parse uuid")
+		return nil, err
+	}
+	return uc.repo.FindByID(ctx, parseUUID)
+}

@@ -13,6 +13,7 @@ import (
 	documents "github.com/ComputerMaestro/kollap/gen/documents"
 	workspaces "github.com/ComputerMaestro/kollap/gen/workspaces"
 	httpadapters "github.com/ComputerMaestro/kollap/internal/adapters/http"
+	"github.com/ComputerMaestro/kollap/internal/application/document"
 	"github.com/ComputerMaestro/kollap/internal/application/workspace"
 	"github.com/ComputerMaestro/kollap/internal/config"
 	postgresrepo "github.com/ComputerMaestro/kollap/internal/infrastructure/postgres"
@@ -52,7 +53,14 @@ func main() {
 	}
 
 	workspaceRepo := postgresrepo.NewWorkspacePostgresRepository(db)
+	documentRepo := postgresrepo.NewDocumentPostgresRepository(db)
+
 	createWorkspaceUC := workspace.NewCreateWorkspaceUC(workspaceRepo)
+	getWorkspaceUC := workspace.NewGetWorkspaceUC(workspaceRepo)
+	getAllWorkspaceDocumentsUC := workspace.NewGetAllWorkspaceDocumentsUC(documentRepo)
+
+	createDocumentUC := document.NewCreateDocumentUC(documentRepo)
+	getDocumentUC := document.NewGetDocumentUC(documentRepo)
 
 	// Initialize the services.
 	var (
@@ -62,8 +70,13 @@ func main() {
 	{
 		workspacesSvc = httpadapters.NewWorkspaces(
 			createWorkspaceUC,
+			getWorkspaceUC,
+			getAllWorkspaceDocumentsUC,
 		)
-		documentsSvc = httpadapters.NewDocuments()
+		documentsSvc = httpadapters.NewDocuments(
+			createDocumentUC,
+			getDocumentUC,
+		)
 	}
 
 	// Wrap the services in endpoints that can be invoked from other services

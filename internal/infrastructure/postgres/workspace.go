@@ -5,6 +5,7 @@ import (
 
 	"github.com/ComputerMaestro/kollap/internal/domain"
 	"github.com/ComputerMaestro/kollap/internal/infrastructure/postgres/models"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -18,8 +19,8 @@ func NewWorkspacePostgresRepository(db *gorm.DB) *WorkspacePostgresRepository {
 	}
 }
 
-func (r *WorkspacePostgresRepository) FindByID(ctx context.Context, id string) (*domain.Workspace, error) {
-	var workspace models.WorkspaceModel
+func (r *WorkspacePostgresRepository) FindByID(ctx context.Context, id uuid.UUID) (*domain.Workspace, error) {
+	var workspace models.Workspace
 	if err := r.db.WithContext(ctx).First(&workspace, id).Error; err != nil {
 		return nil, err
 	}

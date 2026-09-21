@@ -38,9 +38,14 @@ var Document = Type("Document", func() {
 	Attribute("title", String)
 	Attribute("version", Int64)
 	Attribute("content", String)
+	Attribute("workspace_id", func() {
+		Format(FormatUUID)
+	})
 	Attribute("created_at", String, func() {
 		Format(FormatDateTime)
 	})
+
+	Required("id", "title", "version", "content", "workspace_id", "created_at")
 })
 
 var _ = Service("workspaces", func() {
@@ -76,7 +81,7 @@ var _ = Service("workspaces", func() {
 		Result(Workspace)
 
 		HTTP(func() {
-			POST("/workspaces/{id}")
+			GET("/workspaces/{id}")
 		})
 	})
 
@@ -88,10 +93,12 @@ var _ = Service("workspaces", func() {
 
 			Required("id")
 		})
-		Result(Workspace)
+		Result(func() {
+			Attribute("documents", ArrayOf(Document))
+		})
 
 		HTTP(func() {
-			POST("/workspaces/{id}/documents")
+			GET("/workspaces/{id}/documents")
 		})
 	})
 })

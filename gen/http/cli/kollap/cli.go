@@ -24,8 +24,8 @@ import (
 //	command (subcommand1|subcommand2|...)
 func UsageCommands() []string {
 	return []string{
-		"workspaces create-workspace",
-		"documents get-document",
+		"workspaces (create-workspace|get-workspace|get-all-workspace-documents)",
+		"documents (get-document|create-document)",
 	}
 }
 
@@ -51,16 +51,28 @@ func ParseEndpoint(
 		workspacesCreateWorkspaceFlags    = flag.NewFlagSet("create-workspace", flag.ExitOnError)
 		workspacesCreateWorkspaceBodyFlag = workspacesCreateWorkspaceFlags.String("body", "REQUIRED", "")
 
+		workspacesGetWorkspaceFlags  = flag.NewFlagSet("get-workspace", flag.ExitOnError)
+		workspacesGetWorkspaceIDFlag = workspacesGetWorkspaceFlags.String("id", "REQUIRED", "")
+
+		workspacesGetAllWorkspaceDocumentsFlags  = flag.NewFlagSet("get-all-workspace-documents", flag.ExitOnError)
+		workspacesGetAllWorkspaceDocumentsIDFlag = workspacesGetAllWorkspaceDocumentsFlags.String("id", "REQUIRED", "")
+
 		documentsFlags = flag.NewFlagSet("documents", flag.ContinueOnError)
 
 		documentsGetDocumentFlags  = flag.NewFlagSet("get-document", flag.ExitOnError)
 		documentsGetDocumentIDFlag = documentsGetDocumentFlags.String("id", "REQUIRED", "")
+
+		documentsCreateDocumentFlags    = flag.NewFlagSet("create-document", flag.ExitOnError)
+		documentsCreateDocumentBodyFlag = documentsCreateDocumentFlags.String("body", "REQUIRED", "")
 	)
 	workspacesFlags.Usage = workspacesUsage
 	workspacesCreateWorkspaceFlags.Usage = workspacesCreateWorkspaceUsage
+	workspacesGetWorkspaceFlags.Usage = workspacesGetWorkspaceUsage
+	workspacesGetAllWorkspaceDocumentsFlags.Usage = workspacesGetAllWorkspaceDocumentsUsage
 
 	documentsFlags.Usage = documentsUsage
 	documentsGetDocumentFlags.Usage = documentsGetDocumentUsage
+	documentsCreateDocumentFlags.Usage = documentsCreateDocumentUsage
 
 	if err := flag.CommandLine.Parse(os.Args[1:]); err != nil {
 		return nil, nil, err
@@ -101,12 +113,21 @@ func ParseEndpoint(
 			case "create-workspace":
 				epf = workspacesCreateWorkspaceFlags
 
+			case "get-workspace":
+				epf = workspacesGetWorkspaceFlags
+
+			case "get-all-workspace-documents":
+				epf = workspacesGetAllWorkspaceDocumentsFlags
+
 			}
 
 		case "documents":
 			switch epn {
 			case "get-document":
 				epf = documentsGetDocumentFlags
+
+			case "create-document":
+				epf = documentsCreateDocumentFlags
 
 			}
 
@@ -136,6 +157,12 @@ func ParseEndpoint(
 			case "create-workspace":
 				endpoint = c.CreateWorkspace()
 				data, err = workspacesc.BuildCreateWorkspacePayload(*workspacesCreateWorkspaceBodyFlag)
+			case "get-workspace":
+				endpoint = c.GetWorkspace()
+				data, err = workspacesc.BuildGetWorkspacePayload(*workspacesGetWorkspaceIDFlag)
+			case "get-all-workspace-documents":
+				endpoint = c.GetAllWorkspaceDocuments()
+				data, err = workspacesc.BuildGetAllWorkspaceDocumentsPayload(*workspacesGetAllWorkspaceDocumentsIDFlag)
 			}
 		case "documents":
 			c := documentsc.NewClient(scheme, host, doer, enc, dec, restore)
@@ -143,6 +170,9 @@ func ParseEndpoint(
 			case "get-document":
 				endpoint = c.GetDocument()
 				data, err = documentsc.BuildGetDocumentPayload(*documentsGetDocumentIDFlag)
+			case "create-document":
+				endpoint = c.CreateDocument()
+				data, err = documentsc.BuildCreateDocumentPayload(*documentsCreateDocumentBodyFlag)
 			}
 		}
 	}
@@ -160,6 +190,8 @@ func workspacesUsage() {
 	fmt.Fprintf(os.Stderr, "Usage:\n    %s [globalflags] workspaces COMMAND [flags]\n\n", os.Args[0])
 	fmt.Fprintln(os.Stderr, "COMMAND:")
 	fmt.Fprintln(os.Stderr, `    create-workspace: CreateWorkspace implements createWorkspace.`)
+	fmt.Fprintln(os.Stderr, `    get-workspace: GetWorkspace implements getWorkspace.`)
+	fmt.Fprintln(os.Stderr, `    get-all-workspace-documents: GetAllWorkspaceDocuments implements getAllWorkspaceDocuments.`)
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Additional help:")
 	fmt.Fprintf(os.Stderr, "    %s workspaces COMMAND --help\n", os.Args[0])
@@ -182,6 +214,42 @@ func workspacesCreateWorkspaceUsage() {
 	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "workspaces create-workspace --body '{\n      \"name\": \"Voluptatem corporis nemo qui dicta occaecati.\",\n      \"owner_id\": \"27bd44a5-6cf6-4e18-8b6b-ae8e809b4337\"\n   }'")
 }
 
+func workspacesGetWorkspaceUsage() {
+	// Header with flags
+	fmt.Fprintf(os.Stderr, "%s [flags] workspaces get-workspace", os.Args[0])
+	fmt.Fprint(os.Stderr, " -id STRING")
+	fmt.Fprintln(os.Stderr)
+
+	// Description
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, `GetWorkspace implements getWorkspace.`)
+
+	// Flags list
+	fmt.Fprintln(os.Stderr, `    -id STRING: `)
+
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, "Example:")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "workspaces get-workspace --id \"c5bc20db-2876-4778-8f5f-0ef8ae756ca8\"")
+}
+
+func workspacesGetAllWorkspaceDocumentsUsage() {
+	// Header with flags
+	fmt.Fprintf(os.Stderr, "%s [flags] workspaces get-all-workspace-documents", os.Args[0])
+	fmt.Fprint(os.Stderr, " -id STRING")
+	fmt.Fprintln(os.Stderr)
+
+	// Description
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, `GetAllWorkspaceDocuments implements getAllWorkspaceDocuments.`)
+
+	// Flags list
+	fmt.Fprintln(os.Stderr, `    -id STRING: `)
+
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, "Example:")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "workspaces get-all-workspace-documents --id \"d97cc60b-231e-480c-bfb2-efbc1d17d39c\"")
+}
+
 // documentsUsage displays the usage of the documents command and its
 // subcommands.
 func documentsUsage() {
@@ -189,6 +257,7 @@ func documentsUsage() {
 	fmt.Fprintf(os.Stderr, "Usage:\n    %s [globalflags] documents COMMAND [flags]\n\n", os.Args[0])
 	fmt.Fprintln(os.Stderr, "COMMAND:")
 	fmt.Fprintln(os.Stderr, `    get-document: GetDocument implements getDocument.`)
+	fmt.Fprintln(os.Stderr, `    create-document: CreateDocument implements createDocument.`)
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Additional help:")
 	fmt.Fprintf(os.Stderr, "    %s documents COMMAND --help\n", os.Args[0])
@@ -209,4 +278,22 @@ func documentsGetDocumentUsage() {
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
 	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "documents get-document --id \"8c7dabda-b24d-4484-9199-df8f98d6d854\"")
+}
+
+func documentsCreateDocumentUsage() {
+	// Header with flags
+	fmt.Fprintf(os.Stderr, "%s [flags] documents create-document", os.Args[0])
+	fmt.Fprint(os.Stderr, " -body JSON")
+	fmt.Fprintln(os.Stderr)
+
+	// Description
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, `CreateDocument implements createDocument.`)
+
+	// Flags list
+	fmt.Fprintln(os.Stderr, `    -body JSON: `)
+
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, "Example:")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "documents create-document --body '{\n      \"title\": \"Voluptate et nihil quaerat sit error.\",\n      \"workspace_id\": \"0d5ff728-d37a-412b-8864-6ec621221ec2\"\n   }'")
 }
