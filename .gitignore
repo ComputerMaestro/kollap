@@ -1,4 +1,4 @@
 .env
 engineering_notes
-gen/**
+gen/*
 scripts

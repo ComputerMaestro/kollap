@@ -140,4 +140,20 @@ var _ = Service("documents", func() {
 			POST("/documents")
 		})
 	})
+
+	// Method("updateContent", func() {
+	// 	Payload(func() {
+	// 		Attribute("id", func() {
+	// 			Format(FormatUUID)
+	// 		})
+	// 		Attribute("content", String)
+
+	// 		Required("id", "content")
+	// 	})
+	// 	Result(Document)
+
+	// 	HTTP(func() {
+	// 		PATCH("/documents/{id}")
+	// 	})
+	// })
 })
