@@ -32,6 +32,7 @@ func (s *documentssrvc) GetDocument(ctx context.Context, p *documents.GetDocumen
 	doc, err := s.getDocumentUC.Execute(ctx, p.ID)
 	if err != nil {
 		log.Errorf(ctx, err, "error fetching document details")
+		return
 	}
 	res = &documents.Document{
 		ID:        doc.ID.String(),
@@ -44,7 +45,11 @@ func (s *documentssrvc) GetDocument(ctx context.Context, p *documents.GetDocumen
 }
 
 func (s *documentssrvc) CreateDocument(ctx context.Context, p *documents.CreateDocumentPayload) (res *documents.Document, err error) {
-	w, err := s.createDocumentUC.Execute(ctx, p.Title, p.WorkspaceID)
+	content := ""
+	if p.Content != nil {
+		content = *p.Content
+	}
+	w, err := s.createDocumentUC.Execute(ctx, p.Title, p.WorkspaceID, content)
 	if err != nil {
 		log.Errorf(ctx, err, "failed to execute create workspace use case")
 		return nil, err

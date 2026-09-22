@@ -130,6 +130,7 @@ var _ = Service("documents", func() {
 			Attribute("workspace_id", func() {
 				Format(FormatUUID)
 			})
+			Attribute("content", String)
 
 			Required("title", "workspace_id")
 		})

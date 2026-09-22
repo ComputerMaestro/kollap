@@ -5,6 +5,8 @@ import (
 
 	"github.com/ComputerMaestro/kollap/internal/domain"
 	"github.com/ComputerMaestro/kollap/internal/repository"
+	"github.com/google/uuid"
+	"goa.design/clue/log"
 )
 
 type GetDocumentUC struct {
@@ -18,5 +20,10 @@ func NewGetDocumentUC(repo repository.DocumentRepository) *GetDocumentUC {
 }
 
 func (uc *GetDocumentUC) Execute(ctx context.Context, id string) (*domain.Document, error) {
-	return uc.repo.FindByID(ctx, id)
+	parsedUUID, err := uuid.Parse(id)
+	if err != nil {
+		log.Errorf(ctx, err, "failed to parse document uuid")
+		return nil, err
+	}
+	return uc.repo.FindByID(ctx, parsedUUID)
 }

@@ -8,7 +8,7 @@ import (
 )
 
 type DocumentRepository interface {
-	FindByID(ctx context.Context, id string) (*domain.Document, error)
+	FindByID(ctx context.Context, id uuid.UUID) (*domain.Document, error)
 	Find(ctx context.Context, filter DocumentFilter) ([]*domain.Document, error)
 	Create(ctx context.Context, document *domain.Document) (*domain.Document, error)
 }

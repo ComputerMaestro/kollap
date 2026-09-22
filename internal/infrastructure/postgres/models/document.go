@@ -1,7 +1,6 @@
 package models
 
 import (
-	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
@@ -15,5 +14,4 @@ type Document struct {
 	Version     int64
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
-	DeletedAt   sql.NullTime
 }

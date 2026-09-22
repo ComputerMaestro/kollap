@@ -295,5 +295,5 @@ func documentsCreateDocumentUsage() {
 
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
-	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "documents create-document --body '{\n      \"title\": \"Voluptate et nihil quaerat sit error.\",\n      \"workspace_id\": \"0d5ff728-d37a-412b-8864-6ec621221ec2\"\n   }'")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "documents create-document --body '{\n      \"content\": \"Exercitationem odit natus consequuntur doloremque.\",\n      \"title\": \"Voluptate et nihil quaerat sit error.\",\n      \"workspace_id\": \"0d5ff728-d37a-412b-8864-6ec621221ec2\"\n   }'")
 }

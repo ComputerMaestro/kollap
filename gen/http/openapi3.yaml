@@ -23,6 +23,7 @@ paths:
                         schema:
                             $ref: '#/components/schemas/CreateDocumentRequestBody'
                         example:
+                            content: Exercitationem odit natus consequuntur doloremque.
                             title: Voluptate et nihil quaerat sit error.
                             workspace_id: 0d5ff728-d37a-412b-8864-6ec621221ec2
             responses:
@@ -170,6 +171,9 @@ components:
         CreateDocumentRequestBody:
             type: object
             properties:
+                content:
+                    type: string
+                    example: Exercitationem odit natus consequuntur doloremque.
                 title:
                     type: string
                     example: Voluptate et nihil quaerat sit error.
@@ -179,6 +183,7 @@ components:
                     format: uuid
             description: Request body for createDocument.
             example:
+                content: Exercitationem odit natus consequuntur doloremque.
                 title: Voluptate et nihil quaerat sit error.
                 workspace_id: 0d5ff728-d37a-412b-8864-6ec621221ec2
             required:

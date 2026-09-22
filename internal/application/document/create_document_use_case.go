@@ -19,7 +19,7 @@ func NewCreateDocumentUC(repo repository.DocumentRepository) *CreateDocumentUC {
 	}
 }
 
-func (uc *CreateDocumentUC) Execute(ctx context.Context, name string, workspaceID string) (*domain.Document, error) {
+func (uc *CreateDocumentUC) Execute(ctx context.Context, name string, workspaceID string, content string) (*domain.Document, error) {
 	workspaceUUID, err := uuid.Parse(workspaceID)
 	if err != nil {
 		log.Errorf(ctx, err, "failed to parse UUID")
@@ -29,6 +29,7 @@ func (uc *CreateDocumentUC) Execute(ctx context.Context, name string, workspaceI
 		ID:          uuid.New(),
 		Title:       name,
 		Version:     1,
+		Content:     content,
 		WorkspaceID: workspaceUUID,
 	}
 

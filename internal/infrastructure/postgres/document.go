@@ -6,6 +6,7 @@ import (
 	"github.com/ComputerMaestro/kollap/internal/domain"
 	"github.com/ComputerMaestro/kollap/internal/infrastructure/postgres/models"
 	"github.com/ComputerMaestro/kollap/internal/repository"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -19,9 +20,9 @@ func NewDocumentPostgresRepository(db *gorm.DB) *DocumentPostgresRepository {
 	}
 }
 
-func (r *DocumentPostgresRepository) FindByID(ctx context.Context, id string) (*domain.Document, error) {
+func (r *DocumentPostgresRepository) FindByID(ctx context.Context, id uuid.UUID) (*domain.Document, error) {
 	var document models.Document
-	if err := r.db.WithContext(ctx).First(&document, id).Error; err != nil {
+	if err := r.db.WithContext(ctx).Where("id = ?", id).First(&document).Error; err != nil {
 		return nil, err
 	}
 	return &domain.Document{
