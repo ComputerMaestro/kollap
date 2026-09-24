@@ -61,6 +61,7 @@ func main() {
 
 	createDocumentUC := document.NewCreateDocumentUC(documentRepo)
 	getDocumentUC := document.NewGetDocumentUC(documentRepo)
+	updateDocumentUC := document.NewUpdateDocumentUC(documentRepo)
 
 	// Initialize the services.
 	var (
@@ -76,6 +77,7 @@ func main() {
 		documentsSvc = httpadapters.NewDocuments(
 			createDocumentUC,
 			getDocumentUC,
+			updateDocumentUC,
 		)
 	}
 

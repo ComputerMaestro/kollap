@@ -141,19 +141,20 @@ var _ = Service("documents", func() {
 		})
 	})
 
-	// Method("updateContent", func() {
-	// 	Payload(func() {
-	// 		Attribute("id", func() {
-	// 			Format(FormatUUID)
-	// 		})
-	// 		Attribute("content", String)
+	Method("updateDocument", func() {
+		Payload(func() {
+			Attribute("id", func() {
+				Format(FormatUUID)
+			})
+			Attribute("title", String)
+			Attribute("content", String)
 
-	// 		Required("id", "content")
-	// 	})
-	// 	Result(Document)
+			Required("id")
+		})
+		Result(Document)
 
-	// 	HTTP(func() {
-	// 		PATCH("/documents/{id}")
-	// 	})
-	// })
+		HTTP(func() {
+			PATCH("/documents/{id}")
+		})
+	})
 })

@@ -75,6 +75,24 @@ func (r *DocumentPostgresRepository) Create(ctx context.Context, document *domai
 	return toDomain(model), nil
 }
 
+func (r *DocumentPostgresRepository) Update(ctx context.Context, document *domain.Document) (*domain.Document, error) {
+	model := models.Document{
+		ID:          document.ID,
+		WorkspaceID: document.WorkspaceID,
+		Title:       document.Title,
+		Version:     document.Version,
+		Content:     document.Content,
+		CreatedAt:   document.CreatedAt,
+		UpdatedAt:   document.UpdatedAt,
+	}
+
+	if err := r.db.WithContext(ctx).Updates(&model).Error; err != nil {
+		return nil, err
+	}
+
+	return toDomain(model), nil
+}
+
 func toDomain(model models.Document) *domain.Document {
 	return &domain.Document{
 		ID:          model.ID,

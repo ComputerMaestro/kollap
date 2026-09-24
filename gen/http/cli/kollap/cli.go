@@ -25,7 +25,7 @@ import (
 func UsageCommands() []string {
 	return []string{
 		"workspaces (create-workspace|get-workspace|get-all-workspace-documents)",
-		"documents (get-document|create-document)",
+		"documents (get-document|create-document|update-document)",
 	}
 }
 
@@ -64,6 +64,10 @@ func ParseEndpoint(
 
 		documentsCreateDocumentFlags    = flag.NewFlagSet("create-document", flag.ExitOnError)
 		documentsCreateDocumentBodyFlag = documentsCreateDocumentFlags.String("body", "REQUIRED", "")
+
+		documentsUpdateDocumentFlags    = flag.NewFlagSet("update-document", flag.ExitOnError)
+		documentsUpdateDocumentBodyFlag = documentsUpdateDocumentFlags.String("body", "REQUIRED", "")
+		documentsUpdateDocumentIDFlag   = documentsUpdateDocumentFlags.String("id", "REQUIRED", "")
 	)
 	workspacesFlags.Usage = workspacesUsage
 	workspacesCreateWorkspaceFlags.Usage = workspacesCreateWorkspaceUsage
@@ -73,6 +77,7 @@ func ParseEndpoint(
 	documentsFlags.Usage = documentsUsage
 	documentsGetDocumentFlags.Usage = documentsGetDocumentUsage
 	documentsCreateDocumentFlags.Usage = documentsCreateDocumentUsage
+	documentsUpdateDocumentFlags.Usage = documentsUpdateDocumentUsage
 
 	if err := flag.CommandLine.Parse(os.Args[1:]); err != nil {
 		return nil, nil, err
@@ -129,6 +134,9 @@ func ParseEndpoint(
 			case "create-document":
 				epf = documentsCreateDocumentFlags
 
+			case "update-document":
+				epf = documentsUpdateDocumentFlags
+
 			}
 
 		}
@@ -173,6 +181,9 @@ func ParseEndpoint(
 			case "create-document":
 				endpoint = c.CreateDocument()
 				data, err = documentsc.BuildCreateDocumentPayload(*documentsCreateDocumentBodyFlag)
+			case "update-document":
+				endpoint = c.UpdateDocument()
+				data, err = documentsc.BuildUpdateDocumentPayload(*documentsUpdateDocumentBodyFlag, *documentsUpdateDocumentIDFlag)
 			}
 		}
 	}
@@ -258,6 +269,7 @@ func documentsUsage() {
 	fmt.Fprintln(os.Stderr, "COMMAND:")
 	fmt.Fprintln(os.Stderr, `    get-document: GetDocument implements getDocument.`)
 	fmt.Fprintln(os.Stderr, `    create-document: CreateDocument implements createDocument.`)
+	fmt.Fprintln(os.Stderr, `    update-document: UpdateDocument implements updateDocument.`)
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Additional help:")
 	fmt.Fprintf(os.Stderr, "    %s documents COMMAND --help\n", os.Args[0])
@@ -296,4 +308,24 @@ func documentsCreateDocumentUsage() {
 	fmt.Fprintln(os.Stderr)
 	fmt.Fprintln(os.Stderr, "Example:")
 	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "documents create-document --body '{\n      \"content\": \"Exercitationem odit natus consequuntur doloremque.\",\n      \"title\": \"Voluptate et nihil quaerat sit error.\",\n      \"workspace_id\": \"0d5ff728-d37a-412b-8864-6ec621221ec2\"\n   }'")
+}
+
+func documentsUpdateDocumentUsage() {
+	// Header with flags
+	fmt.Fprintf(os.Stderr, "%s [flags] documents update-document", os.Args[0])
+	fmt.Fprint(os.Stderr, " -body JSON")
+	fmt.Fprint(os.Stderr, " -id STRING")
+	fmt.Fprintln(os.Stderr)
+
+	// Description
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, `UpdateDocument implements updateDocument.`)
+
+	// Flags list
+	fmt.Fprintln(os.Stderr, `    -body JSON: `)
+	fmt.Fprintln(os.Stderr, `    -id STRING: `)
+
+	fmt.Fprintln(os.Stderr)
+	fmt.Fprintln(os.Stderr, "Example:")
+	fmt.Fprintf(os.Stderr, "    %s %s\n", os.Args[0], "documents update-document --body '{\n      \"content\": \"Ipsa aut qui autem voluptatem ad consequatur.\",\n      \"title\": \"Rerum molestiae.\"\n   }' --id \"961e5c43-c5f1-4151-acc7-efeb07029128\"")
 }

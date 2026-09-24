@@ -70,6 +70,36 @@ paths:
                             - created_at
             schemes:
                 - http
+        patch:
+            tags:
+                - documents
+            summary: updateDocument documents
+            operationId: documents#updateDocument
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  type: string
+                  format: uuid
+                - name: UpdateDocumentRequestBody
+                  in: body
+                  required: true
+                  schema:
+                    $ref: '#/definitions/DocumentsUpdateDocumentRequestBody'
+            responses:
+                "200":
+                    description: OK response.
+                    schema:
+                        $ref: '#/definitions/Document'
+                        required:
+                            - id
+                            - title
+                            - version
+                            - content
+                            - workspace_id
+                            - created_at
+            schemes:
+                - http
     /v1/workspaces:
         post:
             tags:
@@ -203,6 +233,19 @@ definitions:
         required:
             - title
             - workspace_id
+    DocumentsUpdateDocumentRequestBody:
+        title: DocumentsUpdateDocumentRequestBody
+        type: object
+        properties:
+            content:
+                type: string
+                example: Ipsa aut qui autem voluptatem ad consequatur.
+            title:
+                type: string
+                example: Rerum molestiae.
+        example:
+            content: Ipsa aut qui autem voluptatem ad consequatur.
+            title: Rerum molestiae.
     Workspace:
         title: Workspace
         type: object

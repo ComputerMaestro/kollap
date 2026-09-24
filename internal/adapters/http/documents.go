@@ -14,16 +14,19 @@ import (
 type documentssrvc struct {
 	createDocumentUC *document.CreateDocumentUC
 	getDocumentUC    *document.GetDocumentUC
+	updateDocumentUC *document.UpdateDocumentUC
 }
 
 // NewDocuments returns the documents service implementation.
 func NewDocuments(
 	createDocumentUC *document.CreateDocumentUC,
 	getDocumentUC *document.GetDocumentUC,
+	updateDocumentUC *document.UpdateDocumentUC,
 ) documents.Service {
 	return &documentssrvc{
 		createDocumentUC: createDocumentUC,
 		getDocumentUC:    getDocumentUC,
+		updateDocumentUC: updateDocumentUC,
 	}
 }
 
@@ -50,6 +53,30 @@ func (s *documentssrvc) CreateDocument(ctx context.Context, p *documents.CreateD
 		content = *p.Content
 	}
 	w, err := s.createDocumentUC.Execute(ctx, p.Title, p.WorkspaceID, content)
+	if err != nil {
+		log.Errorf(ctx, err, "failed to execute create workspace use case")
+		return nil, err
+	}
+	res = &documents.Document{
+		ID:          w.ID.String(),
+		Title:       w.Title,
+		Version:     w.Version,
+		Content:     w.Content,
+		WorkspaceID: w.WorkspaceID.String(),
+		CreatedAt:   w.CreatedAt.Format(time.RFC3339),
+	}
+	return
+}
+
+func (s *documentssrvc) UpdateDocument(ctx context.Context, p *documents.UpdateDocumentPayload) (res *documents.Document, err error) {
+	updates := &document.UpdateDocumentInput{}
+	if p.Content != nil {
+		updates.Content = p.Content
+	}
+	if p.Title != nil {
+		updates.Title = p.Title
+	}
+	w, err := s.updateDocumentUC.Execute(ctx, p.ID, *updates)
 	if err != nil {
 		log.Errorf(ctx, err, "failed to execute create workspace use case")
 		return nil, err

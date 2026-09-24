@@ -69,6 +69,44 @@ paths:
                                 title: Qui nobis sunt.
                                 version: 776250283615509095
                                 workspace_id: ca16f238-c971-4891-b831-a5af3d50c2c8
+        patch:
+            tags:
+                - documents
+            summary: updateDocument documents
+            operationId: documents#updateDocument
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                    example: 961e5c43-c5f1-4151-acc7-efeb07029128
+                    format: uuid
+                  example: c551ea0b-4487-479c-8722-42c99511af6c
+            requestBody:
+                description: Request body for updateDocument.
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/UpdateDocumentRequestBody'
+                        example:
+                            content: Ipsa aut qui autem voluptatem ad consequatur.
+                            title: Rerum molestiae.
+            responses:
+                "200":
+                    description: OK response.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Document'
+                            example:
+                                content: Voluptate est qui facere id.
+                                created_at: "1974-06-28T11:22:33Z"
+                                id: 62e9537e-d767-4320-a870-e39e0e8dd804
+                                title: Ab est.
+                                version: 9031051760683069082
+                                workspace_id: 828d35a5-6a31-4f7f-b774-a6bde272e164
     /v1/workspaces:
         post:
             tags:
@@ -292,6 +330,19 @@ components:
                       title: Est nihil et quasi molestias.
                       version: 5981053160314408447
                       workspace_id: 60d14f46-51e6-4b7d-9bbc-a1f53ed7bc6e
+        UpdateDocumentRequestBody:
+            type: object
+            properties:
+                content:
+                    type: string
+                    example: Ipsa aut qui autem voluptatem ad consequatur.
+                title:
+                    type: string
+                    example: Rerum molestiae.
+            description: Request body for updateDocument.
+            example:
+                content: Ipsa aut qui autem voluptatem ad consequatur.
+                title: Rerum molestiae.
         Workspace:
             type: object
             properties:
