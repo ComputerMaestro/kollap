@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"errors"
 
 	"github.com/ComputerMaestro/kollap/internal/domain"
 	"github.com/ComputerMaestro/kollap/internal/infrastructure/postgres/models"
@@ -22,8 +23,12 @@ func NewDocumentPostgresRepository(db *gorm.DB) *DocumentPostgresRepository {
 
 func (r *DocumentPostgresRepository) FindByID(ctx context.Context, id uuid.UUID) (*domain.Document, error) {
 	var document models.Document
-	if err := r.db.WithContext(ctx).Where("id = ?", id).First(&document).Error; err != nil {
-		return nil, err
+	res := r.db.WithContext(ctx).Where("id = ?", id).First(&document)
+	if res.Error != nil {
+		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
+			return nil, domain.ErrDocumentNotFound
+		}
+		return nil, res.Error
 	}
 	return &domain.Document{
 		ID:          document.ID,
@@ -80,14 +85,21 @@ func (r *DocumentPostgresRepository) Update(ctx context.Context, document *domai
 		ID:          document.ID,
 		WorkspaceID: document.WorkspaceID,
 		Title:       document.Title,
-		Version:     document.Version,
+		Version:     document.Version + 1,
 		Content:     document.Content,
 		CreatedAt:   document.CreatedAt,
 		UpdatedAt:   document.UpdatedAt,
 	}
 
-	if err := r.db.WithContext(ctx).Updates(&model).Error; err != nil {
-		return nil, err
+	res := r.db.WithContext(ctx).Select("*").Where(&models.Document{ID: document.ID, Version: document.Version}).Updates(&model)
+	if res.Error != nil {
+		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
+			return nil, domain.ErrDocumentNotFound
+		}
+		return nil, res.Error
+	}
+	if res.RowsAffected == 0 {
+		return nil, domain.ErrVersionConflict
 	}
 
 	return toDomain(model), nil

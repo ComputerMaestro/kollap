@@ -2,10 +2,12 @@ package http
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	documents "github.com/ComputerMaestro/kollap/gen/documents"
 	"github.com/ComputerMaestro/kollap/internal/application/document"
+	"github.com/ComputerMaestro/kollap/internal/domain"
 	"goa.design/clue/log"
 )
 
@@ -79,8 +81,18 @@ func (s *documentssrvc) UpdateDocument(ctx context.Context, p *documents.UpdateD
 	w, err := s.updateDocumentUC.Execute(ctx, p.ID, *updates)
 	if err != nil {
 		log.Errorf(ctx, err, "failed to execute create workspace use case")
-		return nil, err
+		switch {
+		case errors.Is(err, domain.ErrDocumentNotFound):
+			return nil, documents.MakeNotFound(err)
+
+		case errors.Is(err, domain.ErrVersionConflict):
+			return nil, documents.MakeConflict(err)
+
+		default:
+			return nil, err
+		}
 	}
+
 	res = &documents.Document{
 		ID:          w.ID.String(),
 		Title:       w.Title,

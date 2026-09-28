@@ -153,8 +153,16 @@ var _ = Service("documents", func() {
 		})
 		Result(Document)
 
+		Error("not_found")
+		Error("conflict")
+
 		HTTP(func() {
 			PATCH("/documents/{id}")
+
+			Response(StatusOK)
+
+			Response("not_found", StatusNotFound)
+			Response("conflict", StatusConflict)
 		})
 	})
 })
