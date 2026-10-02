@@ -10,7 +10,8 @@ import (
 )
 
 type UpdateDocumentUC struct {
-	repo repository.DocumentRepository
+	repo      repository.DocumentRepository
+	cacheRepo repository.DocumentCacheRepository
 }
 
 type UpdateDocumentInput struct {
@@ -18,9 +19,10 @@ type UpdateDocumentInput struct {
 	Content *string
 }
 
-func NewUpdateDocumentUC(repo repository.DocumentRepository) *UpdateDocumentUC {
+func NewUpdateDocumentUC(repo repository.DocumentRepository, cacheRepo repository.DocumentCacheRepository) *UpdateDocumentUC {
 	return &UpdateDocumentUC{
-		repo: repo,
+		repo:      repo,
+		cacheRepo: cacheRepo,
 	}
 }
 
@@ -49,6 +51,11 @@ func (uc *UpdateDocumentUC) Execute(ctx context.Context, documentId string, upda
 	if err != nil {
 		log.Errorf(ctx, err, "failed to update document")
 		return nil, err
+	}
+
+	err = uc.cacheRepo.Unlink(ctx, doc.ID)
+	if err != nil {
+		log.Errorf(ctx, err, "failed cache invalidation")
 	}
 
 	return doc, nil

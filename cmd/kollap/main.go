@@ -17,6 +17,8 @@ import (
 	"github.com/ComputerMaestro/kollap/internal/application/workspace"
 	"github.com/ComputerMaestro/kollap/internal/config"
 	postgresrepo "github.com/ComputerMaestro/kollap/internal/infrastructure/postgres"
+	redisrepo "github.com/ComputerMaestro/kollap/internal/infrastructure/redis"
+	"github.com/redis/go-redis/v9"
 	"goa.design/clue/debug"
 	"goa.design/clue/log"
 	"gorm.io/driver/postgres"
@@ -55,13 +57,23 @@ func main() {
 	workspaceRepo := postgresrepo.NewWorkspacePostgresRepository(db)
 	documentRepo := postgresrepo.NewDocumentPostgresRepository(db)
 
+	cache := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "",
+		DB:       0,
+		Protocol: 2,
+	})
+	defer cache.Close()
+
+	cacheRepo := redisrepo.NewDocumentRedisRepository(cache)
+
 	createWorkspaceUC := workspace.NewCreateWorkspaceUC(workspaceRepo)
 	getWorkspaceUC := workspace.NewGetWorkspaceUC(workspaceRepo)
 	getAllWorkspaceDocumentsUC := workspace.NewGetAllWorkspaceDocumentsUC(documentRepo)
 
 	createDocumentUC := document.NewCreateDocumentUC(documentRepo)
-	getDocumentUC := document.NewGetDocumentUC(documentRepo)
-	updateDocumentUC := document.NewUpdateDocumentUC(documentRepo)
+	getDocumentUC := document.NewGetDocumentUC(documentRepo, cacheRepo)
+	updateDocumentUC := document.NewUpdateDocumentUC(documentRepo, cacheRepo)
 
 	// Initialize the services.
 	var (

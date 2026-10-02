@@ -3,6 +3,7 @@ package redis
 import (
 	"context"
 	"encoding/json"
+	"time"
 
 	"github.com/ComputerMaestro/kollap/internal/domain"
 	"github.com/ComputerMaestro/kollap/internal/infrastructure/redis/models"
@@ -35,7 +36,15 @@ func (r *DocumentRedisRepository) Save(ctx context.Context, doc *domain.Document
 	if err != nil {
 		return err
 	}
-	return r.client.Set(ctx, doc.ID.String(), jsonData, redis.KeepTTL).Err()
+	return r.client.Set(ctx, doc.ID.String(), jsonData, 30*time.Second).Err()
+}
+
+func (r *DocumentRedisRepository) Unlink(ctx context.Context, id uuid.UUID) error {
+	err := r.client.Unlink(ctx, id.String()).Err()
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func toDomain(doc *models.CacheDocumentModel) *domain.Document {
