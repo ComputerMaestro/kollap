@@ -10,14 +10,12 @@ import (
 )
 
 type GetDocumentUC struct {
-	repo      repository.DocumentRepository
-	cacheRepo repository.DocumentCacheRepository
+	repo repository.DocumentRepository
 }
 
-func NewGetDocumentUC(repo repository.DocumentRepository, cacheRepo repository.DocumentCacheRepository) *GetDocumentUC {
+func NewGetDocumentUC(repo repository.DocumentRepository) *GetDocumentUC {
 	return &GetDocumentUC{
-		repo:      repo,
-		cacheRepo: cacheRepo,
+		repo: repo,
 	}
 }
 
@@ -27,25 +25,5 @@ func (uc *GetDocumentUC) Execute(ctx context.Context, id string) (*domain.Docume
 		log.Errorf(ctx, err, "failed to parse document uuid")
 		return nil, err
 	}
-
-	doc, err := uc.cacheRepo.FindByID(ctx, parsedUUID)
-	if err != nil {
-		log.Errorf(ctx, err, "cache miss: failed to find doc id %s in cache", id)
-	} else {
-		log.Infof(ctx, "cache hit: found doc in cache %s", id)
-		return doc, nil
-	}
-
-	doc, err = uc.repo.FindByID(ctx, parsedUUID)
-	if err != nil {
-		log.Errorf(ctx, err, "failed to find the doc in the db %v", id)
-		return nil, err
-	}
-
-	err = uc.cacheRepo.Save(ctx, doc)
-	if err != nil {
-		log.Errorf(ctx, err, "failed to update cache for doc %s", id)
-	}
-
-	return doc, nil
+	return uc.repo.FindByID(ctx, parsedUUID)
 }
