@@ -8,7 +8,7 @@ import (
 )
 
 type DocumentCacheRepository interface {
-	FindByID(ctx context.Context, id uuid.UUID) (*domain.Document, error)
-	Save(ctx context.Context, doc *domain.Document) error
+	Get(ctx context.Context, id uuid.UUID) (*domain.Document, error)
+	Set(ctx context.Context, doc *domain.Document) error
 	Unlink(ctx context.Context, id uuid.UUID) error
 }

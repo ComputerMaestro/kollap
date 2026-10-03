@@ -21,7 +21,7 @@ func NewDocumentRedisRepository(client *redis.Client) *DocumentRedisRepository {
 	}
 }
 
-func (r *DocumentRedisRepository) FindByID(ctx context.Context, id uuid.UUID) (*domain.Document, error) {
+func (r *DocumentRedisRepository) Get(ctx context.Context, id uuid.UUID) (*domain.Document, error) {
 	res, err := r.client.Get(ctx, id.String()).Result()
 	if err != nil {
 		return nil, err
@@ -31,7 +31,7 @@ func (r *DocumentRedisRepository) FindByID(ctx context.Context, id uuid.UUID) (*
 	return toDomain(doc), nil
 }
 
-func (r *DocumentRedisRepository) Save(ctx context.Context, doc *domain.Document) error {
+func (r *DocumentRedisRepository) Set(ctx context.Context, doc *domain.Document) error {
 	jsonData, err := json.Marshal(doc)
 	if err != nil {
 		return err

@@ -22,7 +22,7 @@ func NewCachedDocumentRepository(db repository.DocumentRepository, cache reposit
 }
 
 func (r *CachedDocumentRepository) FindByID(ctx context.Context, id uuid.UUID) (*domain.Document, error) {
-	doc, err := r.cache.FindByID(ctx, id)
+	doc, err := r.cache.Get(ctx, id)
 	if err != nil {
 		log.Errorf(ctx, err, "cache miss: failed to find doc id %s in cache", id)
 	} else {
@@ -35,7 +35,7 @@ func (r *CachedDocumentRepository) FindByID(ctx context.Context, id uuid.UUID) (
 		return nil, err
 	}
 
-	err = r.cache.Save(ctx, doc)
+	err = r.cache.Set(ctx, doc)
 	if err != nil {
 		log.Errorf(ctx, err, "failed to update cache for doc %s", id)
 	}
