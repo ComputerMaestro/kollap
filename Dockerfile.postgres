@@ -1,0 +1,8 @@
+FROM postgres:18
+
+COPY --from=ghcr.io/pglayers/pgx-pgvector:18  / /extensions/pgvector/
+
+RUN echo "extension_control_path = '/extensions/pgvector/share:\$system'" \
+    >> /usr/share/postgresql/postgresql.conf.sample && \
+    echo "dynamic_library_path = '/extensions/pgvector/lib:\$libdir'" \
+    >> /usr/share/postgresql/postgresql.conf.sample
