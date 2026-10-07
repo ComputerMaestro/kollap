@@ -21,6 +21,12 @@ services:
       timeout: 3s
       retries: 5
     command: ["redis-server"]
+  embed-server:
+    image: ollama/ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama:/root/.ollama
 
 
 volumes:
@@ -30,3 +36,9 @@ volumes:
       type: 'none'
       o: 'bind'
       device: '${KOLLAP_DB}'
+  ollama:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '${OLLAMA_MODELS}'
