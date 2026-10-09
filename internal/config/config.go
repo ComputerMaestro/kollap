@@ -9,8 +9,9 @@ import (
 
 type (
 	Config struct {
-		Server *Server
-		Db     *Db
+		Server   *Server
+		Db       *Db
+		Embedder *Embedder
 	}
 
 	Server struct {
@@ -27,6 +28,13 @@ type (
 		DBName   string
 		SSLMode  string
 		TimeZone string
+	}
+
+	Embedder struct {
+		Model         string
+		Dimensions    int64
+		Timeout       int64
+		ServerAddress string
 	}
 )
 

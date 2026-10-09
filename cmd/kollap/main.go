@@ -17,6 +17,7 @@ import (
 	"github.com/ComputerMaestro/kollap/internal/application/workspace"
 	"github.com/ComputerMaestro/kollap/internal/config"
 	"github.com/ComputerMaestro/kollap/internal/infrastructure/cache"
+	genkitInfra "github.com/ComputerMaestro/kollap/internal/infrastructure/genkit"
 	postgresrepo "github.com/ComputerMaestro/kollap/internal/infrastructure/postgres"
 	redisrepo "github.com/ComputerMaestro/kollap/internal/infrastructure/redis"
 	"github.com/redis/go-redis/v9"
@@ -68,6 +69,11 @@ func main() {
 
 	redisRepo := redisrepo.NewDocumentRedisRepository(redisClient)
 	cachedDocumentRepo := cache.NewCachedDocumentRepository(documentRepo, redisRepo)
+
+	_, err = genkitInfra.NewGenkitEmbedder(ctx, conf.Embedder)
+	if err != nil {
+		panic("failed to initialize the genkit embedder")
+	}
 
 	createWorkspaceUC := workspace.NewCreateWorkspaceUC(workspaceRepo)
 	getWorkspaceUC := workspace.NewGetWorkspaceUC(workspaceRepo)

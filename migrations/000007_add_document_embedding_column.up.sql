@@ -1,2 +1,2 @@
 ALTER TABLE documents
-ADD embeddings vector;
+ADD embedding vector;

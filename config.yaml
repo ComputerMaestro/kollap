@@ -10,3 +10,8 @@ db:
   dbname: kollapdb
   sslmode: disable
   timezone: Asia/Kolkata
+embedder:
+  model: "qwen3-qmbedding:latest"
+  dimensions: 1024
+  timeout: 60
+  server_address: "http://localhost:11434"

@@ -1,2 +1,2 @@
 ALTER TABLE documents 
-DROP COLUMN IF EXISTS embeddings;
+DROP COLUMN IF EXISTS embedding;
