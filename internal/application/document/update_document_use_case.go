@@ -10,7 +10,8 @@ import (
 )
 
 type UpdateDocumentUC struct {
-	repo repository.DocumentRepository
+	repo     repository.DocumentRepository
+	embedder repository.Embedder
 }
 
 type UpdateDocumentInput struct {
@@ -18,9 +19,10 @@ type UpdateDocumentInput struct {
 	Content *string
 }
 
-func NewUpdateDocumentUC(repo repository.DocumentRepository) *UpdateDocumentUC {
+func NewUpdateDocumentUC(repo repository.DocumentRepository, embedder repository.Embedder) *UpdateDocumentUC {
 	return &UpdateDocumentUC{
-		repo: repo,
+		repo:     repo,
+		embedder: embedder,
 	}
 }
 
@@ -45,5 +47,14 @@ func (uc *UpdateDocumentUC) Execute(ctx context.Context, documentId string, upda
 		doc.Content = *updateInput.Content
 	}
 
-	return uc.repo.Update(ctx, doc)
+	doc, err = uc.repo.Update(ctx, doc)
+	if err != nil {
+		log.Errorf(ctx, err, "error udpating document %v", documentId)
+		return nil, err
+	}
+
+	bgCtx := context.WithoutCancel(ctx)
+	go embedDocument(bgCtx, uc.repo, uc.embedder, doc)
+
+	return doc, nil
 }

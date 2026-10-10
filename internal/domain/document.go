@@ -12,6 +12,7 @@ type Document struct {
 	WorkspaceID uuid.UUID
 	Content     string
 	Version     int64
+	Embedding   []float32
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }

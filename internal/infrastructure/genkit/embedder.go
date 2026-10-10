@@ -2,6 +2,7 @@ package genkit
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/ComputerMaestro/kollap/internal/config"
 	"github.com/ComputerMaestro/kollap/internal/domain"
@@ -21,6 +22,7 @@ func NewGenkitEmbedder(ctx context.Context, conf *config.Embedder) (*GenkitEmbed
 		ServerAddress: conf.ServerAddress, // Default Ollama server
 		Timeout:       int(conf.Timeout),  // Response timeout in seconds
 	}
+	fmt.Printf("%v", conf)
 
 	g := genkit.Init(ctx, genkit.WithPlugins(o))
 

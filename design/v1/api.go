@@ -5,7 +5,7 @@ import (
 )
 
 var _ = API("kollap", func() {
-	Title("Collaborative Knowledge Platform Backenk service")
+	Title("Collaborative Knowledge Platform Backend service")
 	Description(`
 	API for backend service powering Kollap platform.
 	`)

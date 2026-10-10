@@ -70,7 +70,7 @@ func main() {
 	redisRepo := redisrepo.NewDocumentRedisRepository(redisClient)
 	cachedDocumentRepo := cache.NewCachedDocumentRepository(documentRepo, redisRepo)
 
-	_, err = genkitInfra.NewGenkitEmbedder(ctx, conf.Embedder)
+	embedder, err := genkitInfra.NewGenkitEmbedder(ctx, conf.Embedder)
 	if err != nil {
 		panic("failed to initialize the genkit embedder")
 	}
@@ -79,9 +79,9 @@ func main() {
 	getWorkspaceUC := workspace.NewGetWorkspaceUC(workspaceRepo)
 	getAllWorkspaceDocumentsUC := workspace.NewGetAllWorkspaceDocumentsUC(documentRepo)
 
-	createDocumentUC := document.NewCreateDocumentUC(documentRepo)
+	createDocumentUC := document.NewCreateDocumentUC(documentRepo, embedder)
 	getDocumentUC := document.NewGetDocumentUC(cachedDocumentRepo)
-	updateDocumentUC := document.NewUpdateDocumentUC(cachedDocumentRepo)
+	updateDocumentUC := document.NewUpdateDocumentUC(cachedDocumentRepo, embedder)
 
 	// Initialize the services.
 	var (

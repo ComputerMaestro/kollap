@@ -8,6 +8,7 @@ import (
 	"github.com/ComputerMaestro/kollap/internal/infrastructure/postgres/models"
 	"github.com/ComputerMaestro/kollap/internal/repository"
 	"github.com/google/uuid"
+	"github.com/pgvector/pgvector-go"
 	"gorm.io/gorm"
 )
 
@@ -37,6 +38,7 @@ func (r *DocumentPostgresRepository) FindByID(ctx context.Context, id uuid.UUID)
 		Content:     document.Content,
 		Version:     document.Version,
 		CreatedAt:   document.CreatedAt,
+		Embedding:   document.Embedding.Slice(),
 	}, nil
 }
 
@@ -68,6 +70,7 @@ func (r *DocumentPostgresRepository) Create(ctx context.Context, document *domai
 		Content:     document.Content,
 		CreatedAt:   document.CreatedAt,
 		UpdatedAt:   document.UpdatedAt,
+		Embedding:   pgvector.NewVector([]float32{0}),
 	}
 
 	if err := r.db.
@@ -89,6 +92,7 @@ func (r *DocumentPostgresRepository) Update(ctx context.Context, document *domai
 		Content:     document.Content,
 		CreatedAt:   document.CreatedAt,
 		UpdatedAt:   document.UpdatedAt,
+		Embedding:   pgvector.NewVector(document.Embedding),
 	}
 
 	res := r.db.WithContext(ctx).Select("*").Where(&models.Document{ID: document.ID, Version: document.Version}).Updates(&model)
@@ -113,6 +117,7 @@ func toDomain(model models.Document) *domain.Document {
 		Content:     model.Content,
 		Version:     model.Version,
 		CreatedAt:   model.CreatedAt,
+		Embedding:   model.Embedding.Slice(),
 	}
 }
 

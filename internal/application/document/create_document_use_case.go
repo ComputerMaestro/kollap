@@ -10,12 +10,14 @@ import (
 )
 
 type CreateDocumentUC struct {
-	repo repository.DocumentRepository
+	repo     repository.DocumentRepository
+	embedder repository.Embedder
 }
 
-func NewCreateDocumentUC(repo repository.DocumentRepository) *CreateDocumentUC {
+func NewCreateDocumentUC(repo repository.DocumentRepository, embedder repository.Embedder) *CreateDocumentUC {
 	return &CreateDocumentUC{
-		repo: repo,
+		repo:     repo,
+		embedder: embedder,
 	}
 }
 
@@ -33,5 +35,27 @@ func (uc *CreateDocumentUC) Execute(ctx context.Context, name string, workspaceI
 		WorkspaceID: workspaceUUID,
 	}
 
-	return uc.repo.Create(ctx, Document)
+	doc, err := uc.repo.Create(ctx, Document)
+	if err != nil {
+		log.Errorf(ctx, err, "error creating document %v", Document)
+		return nil, err
+	}
+
+	bgCtx := context.WithoutCancel(ctx)
+	go embedDocument(bgCtx, uc.repo, uc.embedder, doc)
+
+	return doc, nil
+}
+
+func embedDocument(ctx context.Context, documentRepo repository.DocumentRepository, embedder repository.Embedder, doc *domain.Document) {
+	embedding, err := embedder.Embed(ctx, doc)
+	if err != nil {
+		log.Errorf(ctx, err, "failed to embed document %v", doc.ID)
+		return
+	}
+	doc.Embedding = embedding
+	_, err = documentRepo.Update(ctx, doc)
+	if err != nil {
+		log.Errorf(ctx, err, "failed to update embedding in the doc %v", doc.ID)
+	}
 }

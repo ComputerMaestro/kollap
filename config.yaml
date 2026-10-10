@@ -11,7 +11,7 @@ db:
   sslmode: disable
   timezone: Asia/Kolkata
 embedder:
-  model: "qwen3-qmbedding:latest"
+  model: "qwen3-embedding"
   dimensions: 1024
   timeout: 60
-  server_address: "http://localhost:11434"
+  serveraddress: "http://localhost:11434"

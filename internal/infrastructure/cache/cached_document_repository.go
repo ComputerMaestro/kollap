@@ -47,6 +47,7 @@ func (r *CachedDocumentRepository) FindByID(ctx context.Context, id uuid.UUID) (
 		Content:     doc.Content,
 		Version:     doc.Version,
 		CreatedAt:   doc.CreatedAt,
+		Embedding:   doc.Embedding,
 	}, nil
 }
 
