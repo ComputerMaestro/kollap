@@ -1,0 +1,52 @@
+$kind: http-request
+url: "{{baseUrl}}/v1/documents/:id"
+method: PATCH
+headers:
+  Content-Type: application/json
+  Accept: application/json
+pathVariables:
+  - key: id
+    value: 3eead15f-e943-4f83-94c2-e0a063a495cf
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "format": "uuid",
+            "example": "961e5c43-c5f1-4151-acc7-efeb07029128"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+body:
+  type: json
+  content: |-
+    {
+      "content": "In 1955, Disneyland had just opened in Anaheim, California, when a ten-year-old boy walked in and asked for a job. Labor laws were loose back then and the boy managed to land a position selling guidebooks for $0.50 apiece.\n\nWithin a year, he had transitioned to Disney’s magic shop, where he learned tricks from the older employees. He experimented with jokes and tried out simple routines on visitors. Soon he discovered that what he loved was not performing magic but performing in general. He set his sights on becoming a comedian.\n\nBeginning in his teenage years, he started performing in little clubs around Los Angeles. The crowds were small and his act was short. He was rarely on stage for more than five minutes. Most of the people in the crowd were too busy drinking or talking with friends to pay attention. One night, he literally delivered his stand-up routine to an empty club.\n\nIt wasn’t glamorous work, but there was no doubt he was getting better. His first routines would only last one or two minutes. By high school, his material had expanded to include a five-minute act and, a few years later, a ten-minute show. At nineteen, he was performing weekly for twenty minutes at a time. He had to read three poems during the show just to make the routine long enough, but his skills continued to progress.\n\nHe spent another decade experimenting, adjusting, and practicing. He took a job as a television writer and, gradually, he was able to land his own appearances on talk shows. By the mid-1970s, he had worked his way into being a regular guest on The Tonight Show and Saturday Night Live.\n\nFinally, after nearly fifteen years of work, the young man rose to fame. He toured sixty cities in sixty-three days. Then seventy-two cities in eighty days. Then eighty-five cities in ninety days. He had 18,695 people attend one show in Ohio. Another 45,000 tickets were sold for his three-day show in New York. He catapulted to the top of his genre and became one of the most successful comedians of his time.\n\nHis name is Steve Martin.",
+      "title": "The Goldilocks Rule"
+    }
+  $type: |-
+    {
+      "description": "Request body for updateDocument.",
+      "type": "object",
+      "example": {
+        "content": "Ipsa aut qui autem voluptatem ad consequatur.",
+        "title": "Rerum molestiae."
+      },
+      "properties": {
+        "content": {
+          "type": "string",
+          "example": "Ipsa aut qui autem voluptatem ad consequatur."
+        },
+        "title": {
+          "type": "string",
+          "example": "Rerum molestiae."
+        }
+      }
+    }
+settings: {}
+examples: ./.resources/updateDocument documents.resources/examples
+order: 2000

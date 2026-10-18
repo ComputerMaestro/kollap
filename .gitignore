@@ -2,3 +2,5 @@
 engineering_notes
 gen/**/*
 scripts/**/*
+seeder/**/*
+.postman

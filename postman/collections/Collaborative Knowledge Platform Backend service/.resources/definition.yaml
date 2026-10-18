@@ -1,0 +1,6 @@
+$kind: collection
+description: "\tAPI for backend service powering Kollap platform.
+
+  \t"
+variables:
+  baseUrl: http://localhost:80

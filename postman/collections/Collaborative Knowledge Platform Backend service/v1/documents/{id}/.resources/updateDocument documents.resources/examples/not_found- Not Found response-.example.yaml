@@ -1,0 +1,87 @@
+$kind: http-example
+name: "not_found: Not Found response."
+request:
+  url: "{{baseUrl}}/v1/documents/:id"
+  method: PATCH
+  headers:
+    Content-Type: application/json
+    Accept: application/vnd.goa.error
+  pathVariables:
+    id: c551ea0b-4487-479c-8722-42c99511af6c
+  body:
+    type: json
+    content: |-
+      {
+        "content": "Ipsa aut qui autem voluptatem ad consequatur.",
+        "title": "Rerum molestiae."
+      }
+response:
+  statusCode: 404
+  statusText: Not Found
+  headers:
+    Content-Type: application/vnd.goa.error
+  body:
+    type: text
+    content: |-
+      {
+        "fault": false,
+        "id": "123abc",
+        "message": "parameter 'p' must be an integer",
+        "name": "bad_request",
+        "temporary": false,
+        "timeout": true
+      }
+    $type: |-
+      {
+        "description": "Error response result type",
+        "type": "object",
+        "example": {
+          "fault": false,
+          "id": "123abc",
+          "message": "parameter 'p' must be an integer",
+          "name": "bad_request",
+          "temporary": false,
+          "timeout": true
+        },
+        "properties": {
+          "fault": {
+            "type": "boolean",
+            "example": false,
+            "description": "Is the error a server-side fault?"
+          },
+          "id": {
+            "type": "string",
+            "example": "123abc",
+            "description": "ID is a unique identifier for this particular occurrence of the problem."
+          },
+          "message": {
+            "type": "string",
+            "example": "parameter 'p' must be an integer",
+            "description": "Message is a human-readable explanation specific to this occurrence of the problem."
+          },
+          "name": {
+            "type": "string",
+            "example": "bad_request",
+            "description": "Name is the name of this class of errors."
+          },
+          "temporary": {
+            "type": "boolean",
+            "example": false,
+            "description": "Is the error temporary?"
+          },
+          "timeout": {
+            "type": "boolean",
+            "example": true,
+            "description": "Is the error a timeout?"
+          }
+        },
+        "required": [
+          "name",
+          "id",
+          "message",
+          "temporary",
+          "timeout",
+          "fault"
+        ]
+      }
+order: 2000

@@ -1,0 +1,46 @@
+$kind: http-request
+url: "{{baseUrl}}/v1/documents"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: application/json
+body:
+  type: json
+  content: |-
+    {
+      "content": "Exercitationem odit natus consequuntur doloremque.",
+      "title": "Voluptate et nihil quaerat sit error.",
+      "workspace_id": "0d5ff728-d37a-412b-8864-6ec621221ec2"
+    }
+  $type: |-
+    {
+      "description": "Request body for createDocument.",
+      "type": "object",
+      "example": {
+        "content": "Exercitationem odit natus consequuntur doloremque.",
+        "title": "Voluptate et nihil quaerat sit error.",
+        "workspace_id": "0d5ff728-d37a-412b-8864-6ec621221ec2"
+      },
+      "properties": {
+        "content": {
+          "type": "string",
+          "example": "Exercitationem odit natus consequuntur doloremque."
+        },
+        "title": {
+          "type": "string",
+          "example": "Voluptate et nihil quaerat sit error."
+        },
+        "workspace_id": {
+          "type": "string",
+          "example": "0d5ff728-d37a-412b-8864-6ec621221ec2",
+          "format": "uuid"
+        }
+      },
+      "required": [
+        "title",
+        "workspace_id"
+      ]
+    }
+settings: {}
+examples: ./.resources/createDocument documents.resources/examples
+order: 2000

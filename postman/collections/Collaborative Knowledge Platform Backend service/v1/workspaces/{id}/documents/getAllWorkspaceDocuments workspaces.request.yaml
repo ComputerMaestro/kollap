@@ -1,0 +1,25 @@
+$kind: http-request
+url: "{{baseUrl}}/v1/workspaces/:id/documents"
+method: GET
+headers:
+  Accept: application/json
+pathVariables:
+  - key: id
+    value: 70e6ef25-05a4-4a66-9516-128fa308ae8d
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "format": "uuid",
+            "example": "d97cc60b-231e-480c-bfb2-efbc1d17d39c"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+settings: {}
+examples: ./.resources/getAllWorkspaceDocuments workspaces.resources/examples
+order: 1000

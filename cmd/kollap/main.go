@@ -20,6 +20,7 @@ import (
 	genkitInfra "github.com/ComputerMaestro/kollap/internal/infrastructure/genkit"
 	postgresrepo "github.com/ComputerMaestro/kollap/internal/infrastructure/postgres"
 	redisrepo "github.com/ComputerMaestro/kollap/internal/infrastructure/redis"
+	semanticsearch "github.com/ComputerMaestro/kollap/internal/infrastructure/semantic_search"
 	"github.com/redis/go-redis/v9"
 	"goa.design/clue/debug"
 	"goa.design/clue/log"
@@ -74,6 +75,7 @@ func main() {
 	if err != nil {
 		panic("failed to initialize the genkit embedder")
 	}
+	searcher := semanticsearch.NewSemanticSearcher(embedder, documentRepo)
 
 	createWorkspaceUC := workspace.NewCreateWorkspaceUC(workspaceRepo)
 	getWorkspaceUC := workspace.NewGetWorkspaceUC(workspaceRepo)
@@ -82,6 +84,7 @@ func main() {
 	createDocumentUC := document.NewCreateDocumentUC(documentRepo, embedder)
 	getDocumentUC := document.NewGetDocumentUC(cachedDocumentRepo)
 	updateDocumentUC := document.NewUpdateDocumentUC(cachedDocumentRepo, embedder)
+	getSimilarDocumentsUC := document.NewGetSimilarDocumentsUC(searcher)
 
 	// Initialize the services.
 	var (
@@ -98,6 +101,7 @@ func main() {
 			createDocumentUC,
 			getDocumentUC,
 			updateDocumentUC,
+			getSimilarDocumentsUC,
 		)
 	}
 

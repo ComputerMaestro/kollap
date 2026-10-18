@@ -1,0 +1,25 @@
+$kind: http-request
+url: "{{baseUrl}}/v1/documents/:id"
+method: GET
+headers:
+  Accept: application/json
+pathVariables:
+  - key: id
+    value: 9b1b6de0-efc8-475c-92f8-15c3537edf65
+    $type: |-
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "format": "uuid",
+            "example": "8c7dabda-b24d-4484-9199-df8f98d6d854"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+settings: {}
+examples: ./.resources/getDocument documents.resources/examples
+order: 1000

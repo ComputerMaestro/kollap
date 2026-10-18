@@ -10,6 +10,11 @@ import (
 	"github.com/google/uuid"
 	"github.com/pgvector/pgvector-go"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
+)
+
+const (
+	SIMILAR_DOCUMENTS_LIMIT = 5
 )
 
 type DocumentPostgresRepository struct {
@@ -51,6 +56,21 @@ func (r *DocumentPostgresRepository) Find(ctx context.Context, filter repository
 	if err := query.Find(&models).Error; err != nil {
 		return nil, err
 	}
+
+	documents := make([]*domain.Document, 0, len(models))
+
+	for _, model := range models {
+		documents = append(documents, toDomain(model))
+	}
+
+	return documents, nil
+}
+
+func (r *DocumentPostgresRepository) FindSimilarDocuments(ctx context.Context, embedding []float32) ([]*domain.Document, error) {
+	var models []models.Document
+	r.db.Clauses(clause.OrderBy{
+		Expression: clause.Expr{SQL: "embedding <-> ?", Vars: []any{pgvector.NewVector(embedding)}},
+	}).Limit(SIMILAR_DOCUMENTS_LIMIT).Find(&models)
 
 	documents := make([]*domain.Document, 0, len(models))
 

@@ -31,6 +31,12 @@ def main():
     print(f"Seeding {len(DOCUMENTS)} documents")
     print(f"API: {DOCUMENTS_URL}")
 
+    for doc in DOCUMENTS:
+        assert len(doc["title"]) < 50, (
+            f"Title too long ({len(doc['title'])} chars): "
+            f"{doc['title']}"
+        )
+
     with requests.Session() as session:
         # Avoid proxy interference in local API testing.
         session.trust_env = False

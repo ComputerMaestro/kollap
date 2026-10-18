@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/ComputerMaestro/kollap/internal/config"
-	"github.com/ComputerMaestro/kollap/internal/domain"
 	"github.com/firebase/genkit/go/ai"
 	"github.com/firebase/genkit/go/genkit"
 	"github.com/firebase/genkit/go/plugins/ollama"
@@ -34,16 +33,14 @@ func NewGenkitEmbedder(ctx context.Context, conf *config.Embedder) (*GenkitEmbed
 	}, nil
 }
 
-func (g *GenkitEmbedder) Embed(ctx context.Context, doc *domain.Document) ([]float32, error) {
+func (g *GenkitEmbedder) Embed(ctx context.Context, content string, metadata map[string]any) ([]float32, error) {
 	res, err := genkit.Embed(ctx,
 		g.genkitInst,
 		ai.WithEmbedder(g.embedder),
-		ai.WithDocs(ai.DocumentFromText(doc.Content, map[string]any{
-			domain.DOCUMENT_TITLE: doc.Title,
-		})),
+		ai.WithDocs(ai.DocumentFromText(content, metadata)),
 	)
 	if err != nil || len(res.Embeddings) == 0 {
-		log.Errorf(ctx, err, "failed to generate embedding for document %v", doc.ID)
+		log.Errorf(ctx, err, "failed to generate embedding for content")
 		return nil, err
 	}
 	return res.Embeddings[0].Embedding, nil

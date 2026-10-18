@@ -1,0 +1,68 @@
+$kind: http-example
+name: OK response.
+request:
+  url: "{{baseUrl}}/v1/workspaces"
+  method: POST
+  headers:
+    Content-Type: application/json
+    Accept: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "name": "Voluptatem corporis nemo qui dicta occaecati.",
+        "owner_id": "27bd44a5-6cf6-4e18-8b6b-ae8e809b4337"
+      }
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: application/json
+  body:
+    type: json
+    content: |-
+      {
+        "created_at": "1997-02-12T09:49:59Z",
+        "id": "72ea645c-b5d8-414b-a9ef-50a95d381edf",
+        "name": "Eum quo incidunt.",
+        "owner_id": "11e6c044-e250-4055-81fd-ba9bfda9b8df"
+      }
+    $type: |-
+      {
+        "description": "Workspace is where multiple people can come and share knowledge using documents.",
+        "type": "object",
+        "example": {
+          "created_at": "1997-02-12T09:49:59Z",
+          "id": "72ea645c-b5d8-414b-a9ef-50a95d381edf",
+          "name": "Eum quo incidunt.",
+          "owner_id": "11e6c044-e250-4055-81fd-ba9bfda9b8df"
+        },
+        "properties": {
+          "created_at": {
+            "type": "string",
+            "example": "1997-02-12T09:49:59Z",
+            "format": "date-time"
+          },
+          "id": {
+            "type": "string",
+            "example": "72ea645c-b5d8-414b-a9ef-50a95d381edf",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "example": "Eum quo incidunt."
+          },
+          "owner_id": {
+            "type": "string",
+            "example": "11e6c044-e250-4055-81fd-ba9bfda9b8df",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "owner_id",
+          "created_at"
+        ]
+      }
+order: 1000

@@ -14,9 +14,10 @@ import (
 // documents service example implementation.
 // The example methods log the requests and return zero values.
 type documentssrvc struct {
-	createDocumentUC *document.CreateDocumentUC
-	getDocumentUC    *document.GetDocumentUC
-	updateDocumentUC *document.UpdateDocumentUC
+	createDocumentUC      *document.CreateDocumentUC
+	getDocumentUC         *document.GetDocumentUC
+	updateDocumentUC      *document.UpdateDocumentUC
+	getSimilarDocumentsUC *document.GetSimilarDocumentsUC
 }
 
 // NewDocuments returns the documents service implementation.
@@ -24,11 +25,13 @@ func NewDocuments(
 	createDocumentUC *document.CreateDocumentUC,
 	getDocumentUC *document.GetDocumentUC,
 	updateDocumentUC *document.UpdateDocumentUC,
+	getSimilarDocumentsUC *document.GetSimilarDocumentsUC,
 ) documents.Service {
 	return &documentssrvc{
-		createDocumentUC: createDocumentUC,
-		getDocumentUC:    getDocumentUC,
-		updateDocumentUC: updateDocumentUC,
+		createDocumentUC:      createDocumentUC,
+		getDocumentUC:         getDocumentUC,
+		updateDocumentUC:      updateDocumentUC,
+		getSimilarDocumentsUC: getSimilarDocumentsUC,
 	}
 }
 
@@ -93,13 +96,29 @@ func (s *documentssrvc) UpdateDocument(ctx context.Context, p *documents.UpdateD
 		}
 	}
 
-	res = &documents.Document{
-		ID:          w.ID.String(),
-		Title:       w.Title,
-		Version:     w.Version,
-		Content:     w.Content,
-		WorkspaceID: w.WorkspaceID.String(),
-		CreatedAt:   w.CreatedAt.Format(time.RFC3339),
+	return toEndpointDoc(w), nil
+}
+
+// GetSimilarDocuments implements getSimilarDocuments.
+func (s *documentssrvc) GetSimilarDocuments(ctx context.Context, p *documents.GetSimilarDocumentsPayload) (res []*documents.Document, err error) {
+	docs, err := s.getSimilarDocumentsUC.Execute(ctx, p.Query)
+	if err != nil {
+		log.Errorf(ctx, err, "failed execution to get similar documents")
+		return nil, err
 	}
-	return
+	for _, d := range docs {
+		res = append(res, toEndpointDoc(d))
+	}
+	return res, nil
+}
+
+func toEndpointDoc(doc *domain.Document) *documents.Document {
+	return &documents.Document{
+		ID:          doc.ID.String(),
+		Title:       doc.Title,
+		Version:     doc.Version,
+		Content:     doc.Content,
+		WorkspaceID: doc.WorkspaceID.String(),
+		CreatedAt:   doc.CreatedAt.Format(time.RFC3339),
+	}
 }

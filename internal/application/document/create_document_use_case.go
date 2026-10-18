@@ -48,7 +48,9 @@ func (uc *CreateDocumentUC) Execute(ctx context.Context, name string, workspaceI
 }
 
 func embedDocument(ctx context.Context, documentRepo repository.DocumentRepository, embedder repository.Embedder, doc *domain.Document) {
-	embedding, err := embedder.Embed(ctx, doc)
+	embedding, err := embedder.Embed(ctx, doc.Content, map[string]any{
+		"title": doc.Title,
+	})
 	if err != nil {
 		log.Errorf(ctx, err, "failed to embed document %v", doc.ID)
 		return

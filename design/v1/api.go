@@ -165,4 +165,18 @@ var _ = Service("documents", func() {
 			Response("conflict", StatusConflict)
 		})
 	})
+
+	Method("getSimilarDocuments", func() {
+		Payload(func() {
+			Attribute("query", String)
+
+			Required("query")
+		})
+		Result(ArrayOf(Document))
+
+		HTTP(func() {
+			GET("/documents")
+			Param("query")
+		})
+	})
 })
