@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/pgvector/pgvector-go"
 )
 
 type Document struct {
@@ -15,5 +14,4 @@ type Document struct {
 	Version     int64
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
-	Embedding   pgvector.Vector `gorm:"type:vector(1024)"`
 }

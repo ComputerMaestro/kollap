@@ -101,9 +101,12 @@ func (s *documentssrvc) UpdateDocument(ctx context.Context, p *documents.UpdateD
 
 // GetSimilarDocuments implements getSimilarDocuments.
 func (s *documentssrvc) GetSimilarDocuments(ctx context.Context, p *documents.GetSimilarDocumentsPayload) (res []*documents.Document, err error) {
-	docs, err := s.getSimilarDocumentsUC.Execute(ctx, p.Query)
+	docs, err := s.getSimilarDocumentsUC.Execute(ctx, p.WorkspaceID, p.Query)
 	if err != nil {
 		log.Errorf(ctx, err, "failed execution to get similar documents")
+		if errors.Is(err, domain.ErrSemanticSearchUnavailable) {
+			return nil, documents.MakeUnavailable(err)
+		}
 		return nil, err
 	}
 	for _, d := range docs {

@@ -168,15 +168,19 @@ var _ = Service("documents", func() {
 
 	Method("getSimilarDocuments", func() {
 		Payload(func() {
+			Attribute("workspace_id", func() { Format(FormatUUID) })
 			Attribute("query", String)
 
-			Required("query")
+			Required("workspace_id", "query")
 		})
 		Result(ArrayOf(Document))
+		Error("unavailable")
 
 		HTTP(func() {
 			GET("/documents")
+			Param("workspace_id")
 			Param("query")
+			Response("unavailable", StatusServiceUnavailable)
 		})
 	})
 })

@@ -9,9 +9,10 @@ import (
 
 type (
 	Config struct {
-		Server   *Server
-		Db       *Db
-		Embedder *Embedder
+		Server         *Server
+		Db             *Db
+		Embedder       *Embedder
+		SemanticSearch *SemanticSearch
 	}
 
 	Server struct {
@@ -35,6 +36,9 @@ type (
 		Dimensions    int64
 		Timeout       int64
 		ServerAddress string
+	}
+	SemanticSearch struct {
+		Enabled bool
 	}
 )
 

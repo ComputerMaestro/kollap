@@ -21,7 +21,6 @@ func NewGenkitEmbedder(ctx context.Context, conf *config.Embedder) (*GenkitEmbed
 		ServerAddress: conf.ServerAddress, // Default Ollama server
 		Timeout:       int(conf.Timeout),  // Response timeout in seconds
 	}
-	fmt.Printf("%v", conf)
 
 	g := genkit.Init(ctx, genkit.WithPlugins(o))
 
@@ -40,6 +39,9 @@ func (g *GenkitEmbedder) Embed(ctx context.Context, content string, metadata map
 		ai.WithDocs(ai.DocumentFromText(content, metadata)),
 	)
 	if err != nil || len(res.Embeddings) == 0 {
+		if err == nil {
+			err = fmt.Errorf("embedder returned no embeddings")
+		}
 		log.Errorf(ctx, err, "failed to generate embedding for content")
 		return nil, err
 	}

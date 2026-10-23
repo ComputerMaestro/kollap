@@ -15,3 +15,5 @@ embedder:
   dimensions: 1024
   timeout: 60
   serveraddress: "http://localhost:11434"
+semantic_search:
+  enabled: true

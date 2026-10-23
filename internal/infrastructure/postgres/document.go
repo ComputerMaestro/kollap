@@ -8,113 +8,50 @@ import (
 	"github.com/ComputerMaestro/kollap/internal/infrastructure/postgres/models"
 	"github.com/ComputerMaestro/kollap/internal/repository"
 	"github.com/google/uuid"
-	"github.com/pgvector/pgvector-go"
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
-const (
-	SIMILAR_DOCUMENTS_LIMIT = 5
-)
-
-type DocumentPostgresRepository struct {
-	db *gorm.DB
-}
+type DocumentPostgresRepository struct{ db *gorm.DB }
 
 func NewDocumentPostgresRepository(db *gorm.DB) *DocumentPostgresRepository {
-	return &DocumentPostgresRepository{
-		db: db,
-	}
+	return &DocumentPostgresRepository{db: db}
 }
 
 func (r *DocumentPostgresRepository) FindByID(ctx context.Context, id uuid.UUID) (*domain.Document, error) {
-	var document models.Document
-	res := r.db.WithContext(ctx).Where("id = ?", id).First(&document)
-	if res.Error != nil {
-		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
-			return nil, domain.ErrDocumentNotFound
-		}
-		return nil, res.Error
+	var model models.Document
+	err := r.db.WithContext(ctx).Where("id = ?", id).First(&model).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, domain.ErrDocumentNotFound
 	}
-	return &domain.Document{
-		ID:          document.ID,
-		WorkspaceID: document.WorkspaceID,
-		Title:       document.Title,
-		Content:     document.Content,
-		Version:     document.Version,
-		CreatedAt:   document.CreatedAt,
-		Embedding:   document.Embedding.Slice(),
-	}, nil
+	if err != nil {
+		return nil, err
+	}
+	return toDomain(model), nil
 }
 
 func (r *DocumentPostgresRepository) Find(ctx context.Context, filter repository.DocumentFilter) ([]*domain.Document, error) {
-	var models []models.Document
-	query := r.db.WithContext(ctx)
-
-	query = applyDocumentFilter(query, filter)
-
-	if err := query.Find(&models).Error; err != nil {
+	var rows []models.Document
+	query := applyDocumentFilter(r.db.WithContext(ctx), filter)
+	if err := query.Find(&rows).Error; err != nil {
 		return nil, err
 	}
-
-	documents := make([]*domain.Document, 0, len(models))
-
-	for _, model := range models {
-		documents = append(documents, toDomain(model))
+	documents := make([]*domain.Document, 0, len(rows))
+	for _, row := range rows {
+		documents = append(documents, toDomain(row))
 	}
-
-	return documents, nil
-}
-
-func (r *DocumentPostgresRepository) FindSimilarDocuments(ctx context.Context, embedding []float32) ([]*domain.Document, error) {
-	var models []models.Document
-	r.db.Clauses(clause.OrderBy{
-		Expression: clause.Expr{SQL: "embedding <-> ?", Vars: []any{pgvector.NewVector(embedding)}},
-	}).Limit(SIMILAR_DOCUMENTS_LIMIT).Find(&models)
-
-	documents := make([]*domain.Document, 0, len(models))
-
-	for _, model := range models {
-		documents = append(documents, toDomain(model))
-	}
-
 	return documents, nil
 }
 
 func (r *DocumentPostgresRepository) Create(ctx context.Context, document *domain.Document) (*domain.Document, error) {
-	model := models.Document{
-		ID:          document.ID,
-		WorkspaceID: document.WorkspaceID,
-		Title:       document.Title,
-		Version:     document.Version,
-		Content:     document.Content,
-		CreatedAt:   document.CreatedAt,
-		UpdatedAt:   document.UpdatedAt,
-		Embedding:   pgvector.NewVector([]float32{0}),
-	}
-
-	if err := r.db.
-		WithContext(ctx).
-		Create(&model).
-		Error; err != nil {
+	model := models.Document{ID: document.ID, WorkspaceID: document.WorkspaceID, Title: document.Title, Version: document.Version, Content: document.Content, CreatedAt: document.CreatedAt, UpdatedAt: document.UpdatedAt}
+	if err := r.db.WithContext(ctx).Create(&model).Error; err != nil {
 		return nil, err
 	}
-
 	return toDomain(model), nil
 }
 
 func (r *DocumentPostgresRepository) Update(ctx context.Context, document *domain.Document) (*domain.Document, error) {
-	model := models.Document{
-		ID:          document.ID,
-		WorkspaceID: document.WorkspaceID,
-		Title:       document.Title,
-		Version:     document.Version + 1,
-		Content:     document.Content,
-		CreatedAt:   document.CreatedAt,
-		UpdatedAt:   document.UpdatedAt,
-		Embedding:   pgvector.NewVector(document.Embedding),
-	}
-
+	model := models.Document{ID: document.ID, WorkspaceID: document.WorkspaceID, Title: document.Title, Version: document.Version + 1, Content: document.Content, CreatedAt: document.CreatedAt, UpdatedAt: document.UpdatedAt}
 	res := r.db.WithContext(ctx).Select("*").Where(&models.Document{ID: document.ID, Version: document.Version}).Updates(&model)
 	if res.Error != nil {
 		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
@@ -125,43 +62,22 @@ func (r *DocumentPostgresRepository) Update(ctx context.Context, document *domai
 	if res.RowsAffected == 0 {
 		return nil, domain.ErrVersionConflict
 	}
-
 	return toDomain(model), nil
 }
 
 func toDomain(model models.Document) *domain.Document {
-	return &domain.Document{
-		ID:          model.ID,
-		WorkspaceID: model.WorkspaceID,
-		Title:       model.Title,
-		Content:     model.Content,
-		Version:     model.Version,
-		CreatedAt:   model.CreatedAt,
-		Embedding:   model.Embedding.Slice(),
-	}
+	return &domain.Document{ID: model.ID, WorkspaceID: model.WorkspaceID, Title: model.Title, Content: model.Content, Version: model.Version, CreatedAt: model.CreatedAt, UpdatedAt: model.UpdatedAt}
 }
 
 func applyDocumentFilter(query *gorm.DB, filter repository.DocumentFilter) *gorm.DB {
 	if filter.WorkspaceID != nil {
-		query = query.Where(
-			"workspace_id = ?",
-			*filter.WorkspaceID,
-		)
+		query = query.Where("workspace_id = ?", *filter.WorkspaceID)
 	}
-
 	if filter.OwnerID != nil {
-		query = query.Where(
-			"owner_id = ?",
-			*filter.OwnerID,
-		)
+		query = query.Where("owner_id = ?", *filter.OwnerID)
 	}
-
 	if filter.Title != nil {
-		query = query.Where(
-			"title = ?",
-			*filter.Title,
-		)
+		query = query.Where("title = ?", *filter.Title)
 	}
-
 	return query
 }

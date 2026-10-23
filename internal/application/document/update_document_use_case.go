@@ -10,8 +10,8 @@ import (
 )
 
 type UpdateDocumentUC struct {
-	repo     repository.DocumentRepository
-	embedder repository.Embedder
+	repo    repository.DocumentRepository
+	indexer repository.DocumentIndexer
 }
 
 type UpdateDocumentInput struct {
@@ -19,10 +19,10 @@ type UpdateDocumentInput struct {
 	Content *string
 }
 
-func NewUpdateDocumentUC(repo repository.DocumentRepository, embedder repository.Embedder) *UpdateDocumentUC {
+func NewUpdateDocumentUC(repo repository.DocumentRepository, indexer repository.DocumentIndexer) *UpdateDocumentUC {
 	return &UpdateDocumentUC{
-		repo:     repo,
-		embedder: embedder,
+		repo:    repo,
+		indexer: indexer,
 	}
 }
 
@@ -53,8 +53,14 @@ func (uc *UpdateDocumentUC) Execute(ctx context.Context, documentId string, upda
 		return nil, err
 	}
 
-	bgCtx := context.WithoutCancel(ctx)
-	go embedDocument(bgCtx, uc.repo, uc.embedder, doc)
+	if uc.indexer != nil {
+		bgCtx := context.WithoutCancel(ctx)
+		go func() {
+			if err := uc.indexer.Index(bgCtx, doc.ID.String(), doc.WorkspaceID.String(), doc.Title, doc.Content); err != nil {
+				log.Errorf(bgCtx, err, "failed to index document %v", doc.ID)
+			}
+		}()
+	}
 
 	return doc, nil
 }

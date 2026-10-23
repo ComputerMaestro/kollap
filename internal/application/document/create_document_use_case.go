@@ -10,14 +10,14 @@ import (
 )
 
 type CreateDocumentUC struct {
-	repo     repository.DocumentRepository
-	embedder repository.Embedder
+	repo    repository.DocumentRepository
+	indexer repository.DocumentIndexer
 }
 
-func NewCreateDocumentUC(repo repository.DocumentRepository, embedder repository.Embedder) *CreateDocumentUC {
+func NewCreateDocumentUC(repo repository.DocumentRepository, indexer repository.DocumentIndexer) *CreateDocumentUC {
 	return &CreateDocumentUC{
-		repo:     repo,
-		embedder: embedder,
+		repo:    repo,
+		indexer: indexer,
 	}
 }
 
@@ -41,23 +41,14 @@ func (uc *CreateDocumentUC) Execute(ctx context.Context, name string, workspaceI
 		return nil, err
 	}
 
-	bgCtx := context.WithoutCancel(ctx)
-	go embedDocument(bgCtx, uc.repo, uc.embedder, doc)
+	if uc.indexer != nil {
+		bgCtx := context.WithoutCancel(ctx)
+		go func() {
+			if err := uc.indexer.Index(bgCtx, doc.ID.String(), doc.WorkspaceID.String(), doc.Title, doc.Content); err != nil {
+				log.Errorf(bgCtx, err, "failed to index document %v", doc.ID)
+			}
+		}()
+	}
 
 	return doc, nil
-}
-
-func embedDocument(ctx context.Context, documentRepo repository.DocumentRepository, embedder repository.Embedder, doc *domain.Document) {
-	embedding, err := embedder.Embed(ctx, doc.Content, map[string]any{
-		"title": doc.Title,
-	})
-	if err != nil {
-		log.Errorf(ctx, err, "failed to embed document %v", doc.ID)
-		return
-	}
-	doc.Embedding = embedding
-	_, err = documentRepo.Update(ctx, doc)
-	if err != nil {
-		log.Errorf(ctx, err, "failed to update embedding in the doc %v", doc.ID)
-	}
 }

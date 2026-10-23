@@ -4,3 +4,4 @@ gen/**/*
 scripts/**/*
 seeder/**/*
 .postman
+postman

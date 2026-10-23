@@ -14,13 +14,14 @@ import (
 	workspaces "github.com/ComputerMaestro/kollap/gen/workspaces"
 	httpadapters "github.com/ComputerMaestro/kollap/internal/adapters/http"
 	"github.com/ComputerMaestro/kollap/internal/application/document"
+	"github.com/ComputerMaestro/kollap/internal/application/semantic"
 	"github.com/ComputerMaestro/kollap/internal/application/workspace"
 	"github.com/ComputerMaestro/kollap/internal/config"
 	"github.com/ComputerMaestro/kollap/internal/infrastructure/cache"
 	genkitInfra "github.com/ComputerMaestro/kollap/internal/infrastructure/genkit"
 	postgresrepo "github.com/ComputerMaestro/kollap/internal/infrastructure/postgres"
 	redisrepo "github.com/ComputerMaestro/kollap/internal/infrastructure/redis"
-	semanticsearch "github.com/ComputerMaestro/kollap/internal/infrastructure/semantic_search"
+	"github.com/ComputerMaestro/kollap/internal/repository"
 	"github.com/redis/go-redis/v9"
 	"goa.design/clue/debug"
 	"goa.design/clue/log"
@@ -71,20 +72,27 @@ func main() {
 	redisRepo := redisrepo.NewDocumentRedisRepository(redisClient)
 	cachedDocumentRepo := cache.NewCachedDocumentRepository(documentRepo, redisRepo)
 
-	embedder, err := genkitInfra.NewGenkitEmbedder(ctx, conf.Embedder)
-	if err != nil {
-		panic("failed to initialize the genkit embedder")
+	var embedder repository.Embedder
+	var indexer repository.DocumentIndexer
+	var embeddings repository.EmbeddingRepository
+	if conf.SemanticSearch.Enabled {
+		genkitEmbedder, err := genkitInfra.NewGenkitEmbedder(ctx, conf.Embedder)
+		if err != nil {
+			panic("failed to initialize the genkit embedder")
+		}
+		embedder = genkitEmbedder
+		embeddings = postgresrepo.NewEmbeddingPostgresRepository(db)
+		indexer = semantic.NewIndexDocumentUC(embedder, embeddings, conf.Embedder.Model)
 	}
-	searcher := semanticsearch.NewSemanticSearcher(embedder, documentRepo)
 
 	createWorkspaceUC := workspace.NewCreateWorkspaceUC(workspaceRepo)
 	getWorkspaceUC := workspace.NewGetWorkspaceUC(workspaceRepo)
 	getAllWorkspaceDocumentsUC := workspace.NewGetAllWorkspaceDocumentsUC(documentRepo)
 
-	createDocumentUC := document.NewCreateDocumentUC(documentRepo, embedder)
+	createDocumentUC := document.NewCreateDocumentUC(documentRepo, indexer)
 	getDocumentUC := document.NewGetDocumentUC(cachedDocumentRepo)
-	updateDocumentUC := document.NewUpdateDocumentUC(cachedDocumentRepo, embedder)
-	getSimilarDocumentsUC := document.NewGetSimilarDocumentsUC(searcher)
+	updateDocumentUC := document.NewUpdateDocumentUC(cachedDocumentRepo, indexer)
+	getSimilarDocumentsUC := document.NewGetSimilarDocumentsUC(embedder, embeddings, documentRepo)
 
 	// Initialize the services.
 	var (
